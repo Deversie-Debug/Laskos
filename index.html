@@ -40,7 +40,7 @@ html, body {
   align-items: center;
   justify-content: center;
   text-shadow: 0 0 8px rgba(255,255,255,0.6), 0 0 12px rgba(255,255,255,0.3);
-  max-width: calc(100% - 40px);
+  max-width: calc(100% - 40px); /* Ensure space from screen edges */
 }
 
 .preloader-text span { display:inline-block; opacity:0; transform: translateY(20px); animation: appear 0.35s forwards; margin-right: 2px; }
@@ -58,7 +58,6 @@ html, body {
 
 .statue-container { position: relative; width:180px; height:180px; display:flex; justify-content:center; align-items:center; }
 .statue-img { width:150px; height:150px; border-radius:50%; border:3px solid #0077cc; z-index:2; }
-.ripple { position:absolute; width:150px; height:150px; border-radius:50%; border:2px solid #0077cc; opacity:0.7; z-index:1; transform: scale(1); transition: transform 0.2s, opacity 0.2s; display:none; }
 
 button { padding:15px 25px; border-radius:50px; border:none; color:white; font-weight:bold; font-size:18px; cursor:pointer; margin:10px; min-width:120px; }
 .answer { background-color:#28a745; }
@@ -71,9 +70,15 @@ button { padding:15px 25px; border-radius:50px; border:none; color:white; font-w
 @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
 @keyframes talk { 0%{transform:scale(1);} 50%{transform:scale(1.03);} 100%{transform:scale(1);} }
 
+/* Ripple rings */
+.ripple-container { position:absolute; width:150px; height:150px; top:0; left:0; pointer-events:none; }
+.ripple-ring { position:absolute; width:100%; height:100%; border:2px solid #0077cc; border-radius:50%; opacity:0.7; transform: scale(0); animation: rippleAnim 2s linear infinite; }
+@keyframes rippleAnim { 0%{transform:scale(0); opacity:0.7;} 80%{transform:scale(1.5); opacity:0;} 100%{transform:scale(1.5); opacity:0;} }
+
 @media(max-width:500px){
   .statue-container { width:140px; height:140px; }
-  .statue-img, .ripple { width:120px; height:120px; }
+  .statue-img { width:120px; height:120px; }
+  .ripple-container { width:120px; height:120px; }
   .flag { width:45px; height:30px; }
 }
 </style>
@@ -110,7 +115,7 @@ button { padding:15px 25px; border-radius:50px; border:none; color:white; font-w
 <div class="screen" id="activeCall">
   <h1>Call with Statue</h1>
   <div class="statue-container" id="activeStatueContainer">
-    <div class="ripple" id="ripple"></div>
+    <div class="ripple-container" id="rippleContainer"></div>
     <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.jpg" alt="Statue" class="statue-img" id="activeStatue">
   </div>
   <button class="end-call" id="endCallBtn">End Call</button>
@@ -167,26 +172,23 @@ flags.forEach(flag => {
   });
 });
 
-// Ripple animation
+// Ripple effect
 const activeCall=document.getElementById('activeCall');
 const answerBtn=document.getElementById('answerBtn');
 const declineBtn=document.getElementById('declineBtn');
 const endCallBtn=document.getElementById('endCallBtn');
 const audio=document.getElementById('audio');
-const ripple=document.getElementById('ripple');
+const rippleContainer=document.getElementById('rippleContainer');
 const activeStatue=document.getElementById('activeStatue');
 
 function startRipple(){
-  ripple.style.display='block';
-  let scale = 1;
-  function animate(){
-    if(ripple.style.display==='none') return;
-    scale += 0.005;
-    ripple.style.transform=`scale(${scale})`;
-    ripple.style.opacity=`${Math.max(0.4, 1 - (scale-1)/1.5)}`;
-    requestAnimationFrame(animate);
+  rippleContainer.innerHTML='';
+  for(let i=0;i<3;i++){
+    const ring=document.createElement('div');
+    ring.classList.add('ripple-ring');
+    ring.style.animationDelay=`${i*0.6}s`;
+    rippleContainer.appendChild(ring);
   }
-  animate();
 }
 
 // Answer call
@@ -211,7 +213,7 @@ declineBtn.addEventListener('click',()=>{
   incomingCall.classList.remove('active');
   activeCall.classList.remove('active');
   languageScreen.classList.add('active');
-  ripple.style.display='none';
+  rippleContainer.innerHTML='';
   activeStatue.classList.remove('talking');
 });
 
@@ -222,13 +224,13 @@ endCallBtn.addEventListener('click',()=>{
   activeCall.classList.remove('active');
   incomingCall.classList.remove('active');
   languageScreen.classList.add('active');
-  ripple.style.display='none';
+  rippleContainer.innerHTML='';
   activeStatue.classList.remove('talking');
 });
 
 // Stop talking animation when audio ends
 audio.addEventListener('ended',()=>{
-  ripple.style.display='none';
+  rippleContainer.innerHTML='';
   activeStatue.classList.remove('talking');
 });
 </script>
