@@ -29,10 +29,10 @@ html, body {
 }
 .screen.active { opacity:1; pointer-events:auto; }
 
-#incomingCall > div, #activeCall > div {
-  flex:1; display:flex; flex-direction: column;
+.screen .container {
+  display:flex; flex-direction: column; align-items: center;
   justify-content: center;
-  align-items: center;
+  height: 100%;
 }
 
 .screen h1, .screen p { color:white; margin:10px 0; text-align:center; }
@@ -41,7 +41,7 @@ html, body {
   position: relative;
   display:flex; justify-content:center; align-items:center;
   width:30vw; height:30vw; max-width:300px; max-height:300px;
-  margin-top:20px;
+  margin:20px 0;
 }
 
 .statue-img {
@@ -59,53 +59,21 @@ html, body {
 @keyframes ripple { 0%{ transform: scale(0.8); opacity:0.5; } 100%{ transform: scale(2.5); opacity:0; } }
 .ripple { position: absolute; border:2px solid rgba(255,255,255,0.5); width:120%; height:120%; border-radius:50%; top:-10%; left:-10%; pointer-events:none; animation:ripple 1s ease-out forwards; }
 
-.slider-container {
-  display: none; 
-  position:absolute;
-  bottom:5%;
-  width: 50%;        
-  max-width: 250px;
-  min-width: 180px;
-  height: 60px;      
-  background: rgba(255,255,255,0.05);
+.accept-btn {
+  padding: 15px 40px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+  background: #0d1b2a;
+  border: 2px solid #fff;
   border-radius: 30px;
-  overflow: hidden;
-  border:1px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  transition: all 0.2s ease;
 }
-
-.slider {
-  width:50px;
-  height:50px;
-  background:#ffffff;
-  border-radius:50%;
-  position:absolute;
-  top:5px;  
-  left:0;
-  cursor:pointer;
-  user-select:none;
-  touch-action:none;
-  transition: transform 0.2s ease-out;
-}
-
-.slider::before {
-  content:''; display:block;
-  width:0; height:0;
-  border-left:12px solid #0d1b2a;
-  border-top:7px solid transparent;
-  border-bottom:7px solid transparent;
-  position:absolute; left:50%; top:50%;
-  transform: translate(-50%, -50%);
-}
-
-.slider-text {
-  position:absolute;
-  left:60px;
-  top:50%;
-  transform:translateY(-50%);
-  color:white;
-  font-weight:bold;
-  font-size:16px;
-  pointer-events:none;
+.accept-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 7px 20px rgba(0,0,0,0.5);
 }
 
 .decline-btn {
@@ -150,11 +118,26 @@ html, body {
 .flag { width:60px; height:40px; cursor:pointer; border-radius:5px; border:2px solid transparent; transition: transform 0.2s, border 0.2s; }
 .flag:hover { transform: scale(1.1); border:2px solid #0077cc; }
 
+#orientationMessage {
+  position: fixed;
+  top:0; left:0;
+  width:100vw; height:100vh;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  font-size: 22px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  padding:20px;
+  z-index:10000;
+  display:none;
+}
+
 @media(max-width:500px){
   .statue-container { width:40vw; height:40vw; }
   .flag { width:45px; height:30px; }
-  .slider-container { width:250px; height:45px; }
-  .slider { width:45px; height:45px; }
+  .accept-btn { font-size:16px; padding:12px 30px; }
   .decline-btn { width:35px; height:35px; font-size:20px; top:10px; right:10px; }
 }
 </style>
@@ -169,35 +152,29 @@ html, body {
     <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Animated-Flag-United-Kingdom.gif" class="flag" data-lang="en" alt="English">
     <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/Animated-Flag-Greece.gif" class="flag" data-lang="gr" alt="Greek">
   </div>
-  <div class="slider-container">
-    <div class="slider" id="slider"></div>
-    <div class="slider-text">Slide to Answer</div>
-  </div>
 </div>
 
+<div id="orientationMessage">Please rotate your phone to vertical orientation</div>
+
 <div class="screen" id="incomingCall">
-  <div>
+  <div class="container">
     <h1>Incoming Call</h1>
     <p id="callName">Vasilis Laskos / Βασίλης Λάσκος</p>
     <div class="statue-container">
       <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.jpg" alt="Statue" class="statue-img" id="incomingStatue">
     </div>
+    <button class="accept-btn" id="acceptBtn">Accept Call</button>
   </div>
   <button id="declineBtn" class="decline-btn">&times;</button>
-  <div class="slider-container">
-    <div class="slider" id="sliderIncoming"></div>
-    <div class="slider-text">Slide to Answer</div>
-  </div>
 </div>
 
 <div class="screen" id="activeCall">
-  <div>
+  <div class="container">
     <h1>Call with Statue</h1>
     <div class="statue-container" id="activeStatueContainer">
       <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.jpg" alt="Statue" class="statue-img" id="activeStatue">
     </div>
   </div>
-  <!-- Close button on active call -->
   <button id="declineBtnActive" class="decline-btn">&times;</button>
 </div>
 
@@ -210,15 +187,14 @@ const incomingCall = document.getElementById('incomingCall');
 const activeCall = document.getElementById('activeCall');
 const audio = document.getElementById('audio');
 const ringtone = document.getElementById('ringtone');
-const flagsContainer = document.querySelector('.flags-container');
 const flags = document.querySelectorAll('.flag');
 const activeStatue = document.getElementById('activeStatue');
 const declineBtn = document.getElementById('declineBtn');
 const declineBtnActive = document.getElementById('declineBtnActive');
-const sliderElems = document.querySelectorAll('.slider');
+const acceptBtn = document.getElementById('acceptBtn');
+const orientationMessage = document.getElementById('orientationMessage');
 
-let isDragging=false, startX=0, sliderMax, rippleAnimationFrame;
-let callActive = false;
+let rippleAnimationFrame;
 
 function animateLettersSequential(text, containerId, callback){
     const container = document.getElementById(containerId);
@@ -234,94 +210,42 @@ function animateLettersSequential(text, containerId, callback){
     }
 }
 
-function resetSlider(slider){
-    slider.style.transition='none';
-    slider.style.transform='translateX(0)';
-}
-
 function restartPreloader(){
     document.getElementById('preloaderTop').innerHTML='';
     document.getElementById('preloaderBottom').innerHTML='';
     const logo = document.getElementById('preloaderLogo');
     logo.style.opacity=0; logo.style.transform="translateY(20px)"; logo.style.animation="none";
+    const flagsContainer = document.querySelector('.flags-container');
     flagsContainer.classList.remove('show');
-    flags.forEach(f=>f.style.pointerEvents='none');
-    sliderElems.forEach(resetSlider);
+
     animateLettersSequential('LIVING','preloaderTop', ()=>{
         logo.style.animation='appear 0.35s forwards';
         logo.addEventListener('animationend', ()=>{
             animateLettersSequential('STATUES','preloaderBottom', ()=>{
                 flagsContainer.classList.add('show');
-                flags.forEach(f=>f.style.pointerEvents='auto');
             });
         });
     });
 }
 
 restartPreloader();
-function showScreen(screenEl){ screenEl.classList.add('active'); }
 
+// Flag click
 flags.forEach(flag => {
-    flag.addEventListener('click', e => {
+    flag.addEventListener('click', ()=>{
         try { ringtone.currentTime = 0; ringtone.play(); } catch(err){ console.log('Ringtone blocked', err); }
         preloader.classList.add('fade-out');
         preloader.addEventListener('transitionend', ()=>{
             preloader.style.display='none';
-            showScreen(incomingCall);
+            incomingCall.classList.add('active');
             document.getElementById('incomingStatue').classList.add('show');
-            callActive = true;
         }, {once:true});
     });
 });
 
-function initSlider(slider){
-    sliderMax = slider.parentElement.offsetWidth - slider.offsetWidth;
-    let sliderX = 0;
-
-    slider.addEventListener('pointerdown', e=>{
-        if(!callActive) return;
-        isDragging=true;
-        startX = e.clientX - sliderX;
-        slider.setPointerCapture(e.pointerId);
-        slider.style.transition='none';
-    });
-
-    slider.addEventListener('pointermove', e=>{
-        if(!callActive || !isDragging) return;
-        let dx = e.clientX - startX;
-        dx = Math.max(0, Math.min(dx, sliderMax));
-        sliderX = dx;
-        slider.style.transform = `translateX(${dx}px)`;
-    });
-
-    slider.addEventListener('pointerup', ()=>{
-        if(!callActive) return;
-        isDragging=false;
-        slider.style.transition='transform 0.2s ease';
-        if(sliderX >= sliderMax){
-            slider.style.transform = `translateX(${sliderMax}px)`;
-            startCall();
-        } else {
-            slider.style.transform = `translateX(0)`;
-            sliderX = 0;
-        }
-    });
-
-    slider.addEventListener('pointercancel', ()=>{
-        if(!callActive) return;
-        isDragging=false;
-        slider.style.transition='transform 0.2s ease';
-        slider.style.transform='translateX(0)';
-        sliderX = 0;
-    });
-}
-sliderElems.forEach(initSlider);
-
 function startCall(){
-    if(!callActive) return;
-    callActive = false;
     incomingCall.classList.remove('active');
-    showScreen(activeCall);
+    activeCall.classList.add('active');
     activeStatue.classList.add('show','talking');
     audio.currentTime=0; audio.play();
     ringtone.pause(); ringtone.currentTime=0;
@@ -347,20 +271,32 @@ function returnToPreloader(){
     ringtone.pause(); ringtone.currentTime=0;
     cancelAnimationFrame(rippleAnimationFrame);
 
-    sliderElems.forEach(resetSlider);
-
     activeCall.classList.remove('active');
     incomingCall.classList.remove('active');
     preloader.style.display='flex';
     preloader.classList.remove('fade-out');
-    callActive = false;
 
     restartPreloader();
 }
 
-// One-tap Decline / Close buttons
+// Buttons
+acceptBtn.addEventListener('click', startCall);
 declineBtn.addEventListener('click', returnToPreloader);
 declineBtnActive.addEventListener('click', returnToPreloader);
+
+// Device orientation detection
+function handleOrientation(event) {
+    const beta = event.beta || 0;  // front-to-back tilt
+    const gamma = event.gamma || 0; // left-to-right tilt
+
+    const isPortrait = Math.abs(beta) < 45 && Math.abs(gamma) < 30;
+
+    orientationMessage.style.display = isPortrait ? 'none' : 'flex';
+}
+
+if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', handleOrientation);
+}
 </script>
 </body>
 </html>
