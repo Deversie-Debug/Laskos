@@ -76,6 +76,16 @@ html, body {
   box-shadow: 0 7px 20px rgba(0,0,0,0.5);
 }
 
+.accept-btn.pulsing {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+  50% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+  100% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+}
+
 .decline-btn {
   position: fixed;
   top: 15px;
@@ -120,18 +130,19 @@ html, body {
 
 #orientationMessage {
   position: fixed;
-  top:0; left:0;
+  top:0;
+  left:0;
   width:100vw; 
   height:100vh;
-  background: rgba(0,0,0,0.95);
-  color: #fff;
-  font-size: 22px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  padding:20px;
-  z-index:99999;
+  background: #000; /* pitch black */
+  color: #fff;      /* white text */
+  font-size: 4vw;   /* responsive font size */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  z-index: 99999;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
@@ -207,20 +218,9 @@ const callName = document.getElementById('callName');
 
 let rippleAnimationFrame;
 
-// Translation texts
 const translations = {
-  en: {
-    incoming: "Incoming Call",
-    active: "Call with Statue",
-    accept: "Accept Call",
-    callName: "Vasilis Laskos / Βασίλης Λάσκος"
-  },
-  gr: {
-    incoming: "Εισερχόμενη Κλήση",
-    active: "Κλήση με Το Άγαλμα",
-    accept: "Αποδοχή Κλήσης",
-    callName: "Βασίλης Λάσκος"
-  }
+  en: { incoming: "Incoming Call", active: "Call with Statue", accept: "Accept Call", callName: "Vasilis Laskos / Βασίλης Λάσκος" },
+  gr: { incoming: "Εισερχόμενη Κλήση", active: "Κλήση με Το Άγαλμα", accept: "Αποδοχή Κλήσης", callName: "Βασίλης Λάσκος" }
 };
 
 function animateLettersSequential(text, containerId, callback){
@@ -263,13 +263,17 @@ flags.forEach(flag => {
         const lang = flag.dataset.lang;
         const t = translations[lang];
 
-        // Translate elements
         incomingTitle.textContent = t.incoming;
         activeTitle.textContent = t.active;
         acceptBtn.textContent = t.accept;
         callName.textContent = t.callName;
 
-        try { ringtone.currentTime = 0; ringtone.play(); } catch(err){ console.log('Ringtone blocked', err); }
+        try { 
+            ringtone.currentTime = 0; 
+            ringtone.play(); 
+            acceptBtn.classList.add('pulsing'); 
+        } catch(err){ console.log('Ringtone blocked', err); }
+
         preloader.classList.add('fade-out');
         preloader.addEventListener('transitionend', ()=>{
             preloader.style.display='none';
@@ -285,6 +289,7 @@ function startCall(){
     activeStatue.classList.add('show','talking');
     audio.currentTime=0; audio.play();
     ringtone.pause(); ringtone.currentTime=0;
+    acceptBtn.classList.remove('pulsing');
 
     function rippleLoop(){
         if(audio.paused || audio.ended) return;
@@ -311,30 +316,23 @@ function returnToPreloader(){
     incomingCall.classList.remove('active');
     preloader.style.display='flex';
     preloader.classList.remove('fade-out');
+    acceptBtn.classList.remove('pulsing');
 
     restartPreloader();
 }
 
-// Button events
 acceptBtn.addEventListener('click', startCall);
 declineBtn.addEventListener('click', returnToPreloader);
 declineBtnActive.addEventListener('click', returnToPreloader);
 
-// Portrait-only orientation detection
 function handleOrientation() {
     const isPortrait = window.innerHeight >= window.innerWidth;
-
     if (!isPortrait) {
-        // Stop all audio
-        audio.pause();
-        audio.currentTime = 0;
-        ringtone.pause();
-        ringtone.currentTime = 0;
-
-        // Show overlay
+        audio.pause(); audio.currentTime=0;
+        ringtone.pause(); ringtone.currentTime=0;
+        acceptBtn.classList.remove('pulsing');
         orientationMessage.classList.add('visible');
     } else {
-        // Reload page on portrait to reset everything
         if (orientationMessage.classList.contains('visible')) {
             orientationMessage.classList.remove('visible');
             location.reload();
@@ -346,7 +344,6 @@ window.addEventListener('resize', handleOrientation);
 window.addEventListener('orientationchange', handleOrientation);
 handleOrientation();
 
-// Block all interactions behind overlay
 document.addEventListener('touchstart', (e) => {
     if (orientationMessage.classList.contains('visible')) e.preventDefault();
 }, { passive: false });
