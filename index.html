@@ -109,7 +109,7 @@ html, body {
 }
 
 .decline-btn {
-  position: absolute;
+  position: fixed;
   top: 15px;
   right: 15px;
   width: 40px;
@@ -124,19 +124,6 @@ html, body {
   justify-content: center;
   align-items: center;
   z-index: 10;
-}
-
-.end-call {
-  padding: 12px 30px;
-  background: #ff4c4c;        
-  color: white;
-  font-size: 18px;
-  font-weight: bold;
-  border: none;
-  border-radius: 25px;         
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  transition: none;
 }
 
 #preloader {
@@ -169,7 +156,6 @@ html, body {
   .slider-container { width:250px; height:45px; }
   .slider { width:45px; height:45px; }
   .decline-btn { width:35px; height:35px; font-size:20px; top:10px; right:10px; }
-  .end-call { font-size:16px; padding:10px 25px; }
 }
 </style>
 </head>
@@ -211,9 +197,8 @@ html, body {
       <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.jpg" alt="Statue" class="statue-img" id="activeStatue">
     </div>
   </div>
-  <div class="buttons">
-    <button class="end-call" id="endCallBtn">End Call</button>
-  </div>
+  <!-- Close button on active call -->
+  <button id="declineBtnActive" class="decline-btn">&times;</button>
 </div>
 
 <audio id="audio" src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.mp3"></audio>
@@ -228,8 +213,8 @@ const ringtone = document.getElementById('ringtone');
 const flagsContainer = document.querySelector('.flags-container');
 const flags = document.querySelectorAll('.flag');
 const activeStatue = document.getElementById('activeStatue');
-const endCallBtn = document.getElementById('endCallBtn');
 const declineBtn = document.getElementById('declineBtn');
+const declineBtnActive = document.getElementById('declineBtnActive');
 const sliderElems = document.querySelectorAll('.slider');
 
 let isDragging=false, startX=0, sliderMax, rippleAnimationFrame;
@@ -358,15 +343,12 @@ audio.addEventListener('ended', ()=>{
 });
 
 function returnToPreloader(){
-    // Stop all audio & ripple
     audio.pause(); audio.currentTime=0;
     ringtone.pause(); ringtone.currentTime=0;
     cancelAnimationFrame(rippleAnimationFrame);
 
-    // Reset slider
     sliderElems.forEach(resetSlider);
 
-    // Reset screens
     activeCall.classList.remove('active');
     incomingCall.classList.remove('active');
     preloader.style.display='flex';
@@ -376,9 +358,9 @@ function returnToPreloader(){
     restartPreloader();
 }
 
-// One-tap End Call and Decline
-endCallBtn.addEventListener('click', returnToPreloader);
+// One-tap Decline / Close buttons
 declineBtn.addEventListener('click', returnToPreloader);
+declineBtnActive.addEventListener('click', returnToPreloader);
 </script>
 </body>
 </html>
