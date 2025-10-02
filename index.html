@@ -58,19 +58,12 @@ html, body {
 
 .statue-container { position: relative; width:180px; height:180px; display:flex; justify-content:center; align-items:center; }
 .statue-img { width:150px; height:150px; border-radius:50%; border:3px solid #0077cc; z-index:2; }
-.ripple { position:absolute; width:150px; height:150px; border-radius:50%; border:2px solid #0077cc; opacity:0.7; z-index:1; transform: scale(1); transition: transform 0.1s, opacity 0.1s; display:none; }
+.ripple { position:absolute; width:150px; height:150px; border-radius:50%; border:2px solid #0077cc; opacity:0.7; z-index:1; transform: scale(1); transition: transform 0.2s, opacity 0.2s; display:none; }
 
 button { padding:15px 25px; border-radius:50px; border:none; color:white; font-weight:bold; font-size:18px; cursor:pointer; margin:10px; min-width:120px; }
 .answer { background-color:#28a745; }
 .decline { background-color:#dc3545; }
 .end-call { background-color:#ff9933; min-width:180px; }
-
-.audio-status {
-  margin-top: 15px;
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-}
 
 .incoming-call .statue-img { animation: bounce 1s infinite; box-shadow: 0 0 15px #0077cc; transition: box-shadow 0.3s ease; }
 .talking { animation: talk 0.6s infinite alternate; }
@@ -111,7 +104,6 @@ button { padding:15px 25px; border-radius:50px; border:none; color:white; font-w
     <button class="answer" id="answerBtn">Answer</button>
     <button class="decline" id="declineBtn">Decline</button>
   </div>
-  <div class="audio-status" id="audioStatus"></div>
 </div>
 
 <!-- Active Call -->
@@ -122,7 +114,6 @@ button { padding:15px 25px; border-radius:50px; border:none; color:white; font-w
     <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.jpg" alt="Statue" class="statue-img" id="activeStatue">
   </div>
   <button class="end-call" id="endCallBtn">End Call</button>
-  <div class="audio-status" id="audioStatusActive"></div>
 </div>
 
 <!-- Audio -->
@@ -176,7 +167,7 @@ flags.forEach(flag => {
   });
 });
 
-// Audio + ripple
+// Ripple animation
 const activeCall=document.getElementById('activeCall');
 const answerBtn=document.getElementById('answerBtn');
 const declineBtn=document.getElementById('declineBtn');
@@ -184,30 +175,18 @@ const endCallBtn=document.getElementById('endCallBtn');
 const audio=document.getElementById('audio');
 const ripple=document.getElementById('ripple');
 const activeStatue=document.getElementById('activeStatue');
-const audioStatus = document.getElementById('audioStatus');
-const audioStatusActive = document.getElementById('audioStatusActive');
 
-let audioContext, analyser, source, dataArray;
-
-function setupAudioVisualizer(){
-  audioContext=new (window.AudioContext||window.webkitAudioContext)();
-  source = audioContext.createMediaElementSource(audio);
-  analyser=audioContext.createAnalyser();
-  source.connect(analyser);
-  analyser.connect(audioContext.destination);
-  analyser.fftSize=256;
-  dataArray=new Uint8Array(analyser.frequencyBinCount);
-
-  function animateRipple(){
-    analyser.getByteFrequencyData(dataArray);
-    let sum=dataArray.reduce((a,b)=>a+b,0);
-    let average=sum/dataArray.length;
-    ripple.style.transform=`scale(${1 + average / 200})`;
-    ripple.style.opacity=`${Math.min(1, average / 100)}`;
-    if(!audio.paused) requestAnimationFrame(animateRipple);
-    else { ripple.style.transform='scale(1)'; ripple.style.opacity='0.7'; }
+function startRipple(){
+  ripple.style.display='block';
+  let scale = 1;
+  function animate(){
+    if(ripple.style.display==='none') return;
+    scale += 0.005;
+    ripple.style.transform=`scale(${scale})`;
+    ripple.style.opacity=`${Math.max(0.4, 1 - (scale-1)/1.5)}`;
+    requestAnimationFrame(animate);
   }
-  animateRipple();
+  animate();
 }
 
 // Answer call
@@ -216,23 +195,12 @@ answerBtn.addEventListener('click',()=>{
   incomingCall.classList.remove('active');
   activeCall.classList.add('active');
 
-  // Ensure AudioContext is running
-  if(!audioContext) setupAudioVisualizer();
-  else if(audioContext.state === 'suspended') audioContext.resume();
-
-  // Play audio immediately
   audio.currentTime = 0;
-  audio.play().then(()=>{
-    audioStatus.textContent = "Audio is playing ✅";
-    audioStatusActive.textContent = "Audio is playing ✅";
-  }).catch(err => {
-    console.log("Audio play blocked:", err);
-    audioStatus.textContent = "Audio not playing ❌";
-    audioStatusActive.textContent = "Audio not playing ❌";
-  });
+  audio.volume = 1;
+  audio.muted = false;
+  audio.play().then(()=>console.log("Audio playing ✅")).catch(err=>console.log("Audio blocked ❌"));
 
-  // Show ripple immediately
-  ripple.style.display='block';
+  startRipple();
   activeStatue.classList.add('talking');
 });
 
@@ -245,8 +213,6 @@ declineBtn.addEventListener('click',()=>{
   languageScreen.classList.add('active');
   ripple.style.display='none';
   activeStatue.classList.remove('talking');
-  audioStatus.textContent = "";
-  audioStatusActive.textContent = "";
 });
 
 // End call
@@ -258,16 +224,12 @@ endCallBtn.addEventListener('click',()=>{
   languageScreen.classList.add('active');
   ripple.style.display='none';
   activeStatue.classList.remove('talking');
-  audioStatus.textContent = "";
-  audioStatusActive.textContent = "";
 });
 
 // Stop talking animation when audio ends
 audio.addEventListener('ended',()=>{
   ripple.style.display='none';
   activeStatue.classList.remove('talking');
-  audioStatus.textContent = "Audio ended";
-  audioStatusActive.textContent = "Audio ended";
 });
 </script>
 
