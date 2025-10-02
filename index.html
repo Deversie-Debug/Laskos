@@ -30,18 +30,19 @@
   .preloader-text {
     font-family: 'Playfair Display', serif;
     font-weight: 900;
-    font-size: clamp(40px, 10vw, 120px);
+    font-size: clamp(30px, 12vw, 120px); /* responsive */
     color: #ffffff;
     white-space: nowrap;
     text-align: center;
     display: flex;
+    flex-wrap: wrap; /* allows text + logo to wrap */
     align-items: center;
     justify-content: center;
     text-shadow: 0 0 8px rgba(255,255,255,0.6), 0 0 12px rgba(255,255,255,0.3);
   }
 
   .preloader-text span { display:inline-block; opacity:0; transform: translateY(20px); animation: appear 0.35s forwards; margin-right: 2px; }
-  .preloader-text img { width: clamp(40px,5vw,60px); height:auto; margin:0 15px; opacity:0; transform:translateY(20px); animation:appear 0.35s forwards; }
+  .preloader-text img { width: clamp(30px,6vw,60px); height:auto; margin:0 10px; opacity:0; transform:translateY(20px); animation:appear 0.35s forwards; }
 
   @keyframes appear { to { opacity:1; transform: translateY(0); } }
 
@@ -118,7 +119,7 @@
 <audio id="ringAudio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
 
 <script>
-// Preloader with logo
+// Preloader
 const preloaderText = document.getElementById('preloaderText');
 const text = preloaderText.textContent;
 preloaderText.textContent = '';
@@ -164,7 +165,7 @@ flags.forEach(flag => {
   });
 });
 
-// Audio + ripple setup
+// Audio + ripple
 const activeCall=document.getElementById('activeCall');
 const answerBtn=document.getElementById('answerBtn');
 const declineBtn=document.getElementById('declineBtn');
@@ -213,7 +214,7 @@ answerBtn.addEventListener('click',()=>{
   },1000);
 });
 
-// Decline call back to language selection
+// Decline call
 declineBtn.addEventListener('click',()=>{
   ringAudio.pause();
   incomingCall.classList.remove('active');
