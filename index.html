@@ -207,17 +207,15 @@ answerBtn.addEventListener('click',()=>{
 
   // Ensure AudioContext is running
   if(!audioContext) setupAudioVisualizer();
-  else audioContext.resume();
+  else if(audioContext.state === 'suspended') audioContext.resume();
 
   // Play audio immediately
   audio.currentTime = 0;
   audio.play().catch(err => console.log("Audio play blocked:", err));
 
-  // Delay ripple/animation for effect
-  setTimeout(()=>{
-    ripple.style.display='block';
-    activeStatue.classList.add('talking');
-  },1000);
+  // Show ripple immediately
+  ripple.style.display='block';
+  activeStatue.classList.add('talking');
 });
 
 // Decline call
