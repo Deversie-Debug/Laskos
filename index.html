@@ -177,20 +177,18 @@ let audioContext, analyser, source, dataArray;
 
 function setupAudioVisualizer(){
   audioContext=new (window.AudioContext||window.webkitAudioContext)();
+  source = audioContext.createMediaElementSource(audio);
   analyser=audioContext.createAnalyser();
-  source=audioContext.createMediaElementSource(audio);
   source.connect(analyser);
   analyser.connect(audioContext.destination);
   analyser.fftSize=256;
-  const bufferLength=analyser.frequencyBinCount;
-  dataArray=new Uint8Array(bufferLength);
+  dataArray=new Uint8Array(analyser.frequencyBinCount);
   function animateRipple(){
     analyser.getByteFrequencyData(dataArray);
     let sum=dataArray.reduce((a,b)=>a+b,0);
     let average=sum/dataArray.length;
-    let scale=1 + (average/200);
-    ripple.style.transform=`scale(${scale})`;
-    ripple.style.opacity=`${Math.min(1, average/100)}`;
+    ripple.style.transform=`scale(${1 + average / 200})`;
+    ripple.style.opacity=`${Math.min(1, average / 100)}`;
     if(!audio.paused) requestAnimationFrame(animateRipple);
     else { ripple.style.transform='scale(1)'; ripple.style.opacity='0.7'; }
   }
@@ -206,10 +204,11 @@ answerBtn.addEventListener('click',()=>{
   activeStatue.classList.add('talking');
 
   setTimeout(()=>{
-    audio.currentTime=0;
-    audio.play();
     if(!audioContext) setupAudioVisualizer();
     else audioContext.resume();
+    
+    audio.currentTime = 0;
+    audio.play().catch(err=>console.log("Audio play blocked:", err));
   },1000);
 });
 
