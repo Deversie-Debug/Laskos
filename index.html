@@ -205,12 +205,14 @@ html, body {
 </div>
 
 <audio id="audio" src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.mp3"></audio>
+<audio id="ringtone" src="https://www.soundjay.com/phone/telephone-ring-01a.mp3" loop></audio>
 
 <script>
 const preloader = document.getElementById('preloader');
 const incomingCall = document.getElementById('incomingCall');
 const activeCall = document.getElementById('activeCall');
 const audio = document.getElementById('audio');
+const ringtone = document.getElementById('ringtone');
 const flagsContainer = document.querySelector('.flags-container');
 const flags = document.querySelectorAll('.flag');
 const activeStatue = document.getElementById('activeStatue');
@@ -270,6 +272,10 @@ flags.forEach(flag=>{
       document.getElementById('incomingStatue').classList.add('show');
       preloader.classList.remove('fade-out');
       sliderElems.forEach(s=>s.style.left='0px'); // reset slider
+
+      // Play ringtone
+      ringtone.currentTime = 0;
+      ringtone.play();
     }, {once:true});
   });
 });
@@ -310,6 +316,7 @@ sliderElems.forEach(initSlider);
 
 // Start call
 function startCall(){
+    ringtone.pause(); // stop ringtone
     incomingCall.classList.remove('active');
     showScreen(activeCall);
     activeStatue.classList.add('show','talking');
@@ -346,6 +353,7 @@ endCallBtn.addEventListener('click', ()=>{
 
 // Decline incoming call → back to preloader
 declineBtn.addEventListener('click', ()=>{
+    ringtone.pause(); // stop ringtone
     incomingCall.classList.remove('active');
     preloader.style.display='flex';
     sliderElems.forEach(s=>s.style.left='0px'); // reset slider
