@@ -4,47 +4,86 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Virtual Statue Phone Call Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&display=swap" rel="stylesheet">
 <style>
-  html, body { margin:0; padding:0; height:100%; width:100%; font-family:Arial,sans-serif; background:#e6f0ff; display:flex; justify-content:center; align-items:center; }
-  .screen { width:100vw; height:100vh; display:none; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:20px; }
-  .active { display:flex; }
-  .flags-container { display:flex; gap:20px; margin-top:30px; }
-  .flag { width:60px; height:40px; cursor:pointer; border-radius:5px; border:2px solid transparent; }
-  .flag:hover { transform: scale(1.1); border:2px solid #0077cc; }
-  .statue-container { position:relative; width:180px; height:180px; display:flex; justify-content:center; align-items:center; margin:20px 0; }
-  .statue-img { width:150px; height:150px; border-radius:50%; border:3px solid #0077cc; z-index:3; }
-  
-  /* Fully visible ripples, slightly larger than statue */
-  .ripple-ring {
-    position: absolute;
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    border: 4px solid #0077cc;
-    opacity: 0.9;
-    pointer-events: none;
-    z-index:2;
-    transform: scale(1);
-    transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+  html, body {
+    margin:0; padding:0; height:100%; width:100%;
+    font-family: Arial, sans-serif;
+    background: #e6f0ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
-  .ripple-ring:nth-child(2) { border-color:#3399ff; }
-  .ripple-ring:nth-child(3) { border-color:#66ccff; }
+
+  /* Preloader */
+  #preloader {
+    position: fixed;
+    top:0; left:0;
+    width:100vw; height:100vh;
+    background: rgba(0,0,0,0.35);
+    display:flex; justify-content:center; align-items:center;
+    flex-direction: column;
+    transition: opacity 0.5s ease;
+    z-index:9999;
+  }
+
+  .preloader-text {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: clamp(40px, 10vw, 120px);
+    color: #ffffff;
+    white-space: nowrap;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 0 8px rgba(255,255,255,0.6), 0 0 12px rgba(255,255,255,0.3);
+  }
+
+  .preloader-text span { display:inline-block; opacity:0; transform: translateY(20px); animation: appear 0.35s forwards; margin-right: 2px; }
+  .preloader-text img { width: clamp(40px,5vw,60px); height:auto; margin:0 15px; opacity:0; transform:translateY(20px); animation:appear 0.35s forwards; }
+
+  @keyframes appear { to { opacity:1; transform: translateY(0); } }
+
+  /* Screens */
+  .screen { display:none; flex-direction: column; justify-content: center; align-items: center; text-align:center; width:100vw; height:100vh; padding:20px; box-sizing:border-box;}
+  .active { display:flex; }
+
+  .flags-container { display:flex; gap:20px; }
+  .flag { width:60px; height:40px; cursor:pointer; border-radius:5px; border:2px solid transparent; transition: transform 0.2s, border 0.2s; }
+  .flag:hover { transform: scale(1.1); border:2px solid #0077cc; }
+
+  .statue-container { position: relative; width:180px; height:180px; display:flex; justify-content:center; align-items:center; }
+  .statue-img { width:150px; height:150px; border-radius:50%; border:3px solid #0077cc; z-index:2; }
+  .ripple { position:absolute; width:150px; height:150px; border-radius:50%; border:2px solid #0077cc; opacity:0.7; z-index:1; transform: scale(1); transition: transform 0.1s, opacity 0.1s; }
 
   button { padding:15px 25px; border-radius:50px; border:none; color:white; font-weight:bold; font-size:18px; cursor:pointer; margin:10px; min-width:120px; }
-  .answer { background-color:#28a745; /* no animation */ }
+  .answer { background-color:#28a745; }
   .decline { background-color:#dc3545; }
   .end-call { background-color:#ff9933; min-width:180px; }
+
+  .incoming-call .statue-img { animation: bounce 1s infinite; box-shadow: 0 0 15px #0077cc; transition: box-shadow 0.3s ease; }
+  .talking { animation: talk 0.6s infinite alternate; }
+
   @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
   @keyframes talk { 0%{transform:scale(1);} 50%{transform:scale(1.03);} 100%{transform:scale(1);} }
-  .incoming-call .statue-img { animation: bounce 1s infinite; box-shadow:0 0 15px #0077cc; }
-  .talking { animation: talk 0.6s infinite alternate; }
+
+  @media(max-width:500px){
+    .statue-container { width:140px; height:140px; }
+    .statue-img, .ripple { width:120px; height:120px; }
+    .flag { width:45px; height:30px; }
+  }
 </style>
 </head>
 <body>
 
+<!-- Preloader -->
+<div id="preloader">
+  <div class="preloader-text" id="preloaderText">LIVING STATUES</div>
+</div>
+
 <!-- Language Selection -->
-<div class="screen active" id="languageScreen">
-  <h1>Select Language</h1>
+<div class="screen" id="languageScreen">
   <div class="flags-container">
     <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Animated-Flag-United-Kingdom.gif" class="flag" data-lang="en" alt="English">
     <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/Animated-Flag-Greece.gif" class="flag" data-lang="gr" alt="Greek">
@@ -54,7 +93,7 @@
 <!-- Incoming Call -->
 <div class="screen" id="incomingCall">
   <h1>Incoming Call</h1>
-  <p id="callName">Vasilis Laskos</p>
+  <p id="callName">Vasilis Laskos / Βασίλης Λάσκος</p>
   <div class="statue-container incoming-call">
     <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.jpg" alt="Statue" class="statue-img" id="incomingStatue">
   </div>
@@ -68,159 +107,134 @@
 <div class="screen" id="activeCall">
   <h1>Call with Statue</h1>
   <div class="statue-container" id="activeStatueContainer">
-    <div class="ripple-ring" id="ring1"></div>
-    <div class="ripple-ring" id="ring2"></div>
-    <div class="ripple-ring" id="ring3"></div>
+    <div class="ripple" id="ripple"></div>
     <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.jpg" alt="Statue" class="statue-img" id="activeStatue">
   </div>
   <button class="end-call" id="endCallBtn">End Call</button>
 </div>
 
-<audio id="audio"></audio>
+<!-- Audio -->
+<audio id="audio" src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.mp3"></audio>
+<audio id="ringAudio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
 
 <script>
+// Preloader with logo
+const preloaderText = document.getElementById('preloaderText');
+const text = preloaderText.textContent;
+preloaderText.textContent = '';
+const imgURL = 'https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/Logo.png';
+let animationIndex = 0;
+for(let i=0;i<text.length;i++){
+  if(text[i]===" "){
+    const img=document.createElement('img');
+    img.src=imgURL;
+    img.style.animationDelay=`${animationIndex*0.15}s`;
+    preloaderText.appendChild(img);
+    animationIndex++;
+  } else {
+    const span=document.createElement('span');
+    span.textContent=text[i];
+    span.style.animationDelay=`${animationIndex*0.15}s`;
+    preloaderText.appendChild(span);
+    animationIndex++;
+  }
+}
+setTimeout(()=>{
+  document.getElementById('preloader').style.opacity='0';
+  setTimeout(()=>{ 
+    document.getElementById('preloader').style.display='none';
+    document.getElementById('languageScreen').classList.add('active'); 
+  },500);
+}, animationIndex*150 + 500);
+
+// Language selection with ringing
 const languageScreen = document.getElementById('languageScreen');
 const incomingCall = document.getElementById('incomingCall');
-const activeCall = document.getElementById('activeCall');
-const answerBtn = document.getElementById('answerBtn');
-const declineBtn = document.getElementById('declineBtn');
-const endCallBtn = document.getElementById('endCallBtn');
-const audio = document.getElementById('audio');
-const activeStatue = document.getElementById('activeStatue');
-
-const ring1 = document.getElementById('ring1');
-const ring2 = document.getElementById('ring2');
-const ring3 = document.getElementById('ring3');
-
 const flags = document.querySelectorAll('.flag');
-let selectedLanguage = 'gr';
+const ringAudio = document.getElementById('ringAudio');
+let selectedLanguage = 'en';
 
-// Hosted audio from GitHub Pages
-let statueVoices = {
-  en: 'https://deversie-debug.github.io/Laskos/LaskosEN.mp3',
-  gr: 'https://deversie-debug.github.io/Laskos/LaskosGR.mp3'
-};
-
-// Translations
-const translations = {
-  en: {
-    selectLanguage: "Select Language",
-    incomingCall: "Incoming Call",
-    callWithStatue: "Call with Statue",
-    answer: "Answer",
-    decline: "Decline",
-    endCall: "End Call",
-    callDeclined: "Call Declined",
-    callEnded: "Call Ended",
-    statueName: "Vasilis Laskos"
-  },
-  gr: {
-    selectLanguage: "Επιλέξτε Γλώσσα",
-    incomingCall: "Εισερχόμενη Κλήση",
-    callWithStatue: "Κλήση με το Άγαλμα",
-    answer: "Απάντηση",
-    decline: "Απόρριψη",
-    endCall: "Τερματισμός Κλήσης",
-    callDeclined: "Κλήση Απορρίφθηκε",
-    callEnded: "Κλήση Τερματίστηκε",
-    statueName: "Βασίλης Λάσκος"
-  }
-};
-
-// Language selection
 flags.forEach(flag => {
   flag.addEventListener('click', () => {
     selectedLanguage = flag.dataset.lang;
-    audio.src = statueVoices[selectedLanguage];
-
-    document.querySelector('#languageScreen h1').textContent = translations[selectedLanguage].selectLanguage;
-    document.querySelector('#callName').textContent = translations[selectedLanguage].statueName;
-    document.querySelector('#incomingCall h1').textContent = translations[selectedLanguage].incomingCall;
-    document.querySelector('#activeCall h1').textContent = translations[selectedLanguage].callWithStatue;
-    answerBtn.textContent = translations[selectedLanguage].answer;
-    declineBtn.textContent = translations[selectedLanguage].decline;
-    endCallBtn.textContent = translations[selectedLanguage].endCall;
-
     languageScreen.classList.remove('active');
+    ringAudio.currentTime=0;
+    ringAudio.play();
     incomingCall.classList.add('active');
   });
 });
 
+// Audio + ripple setup
+const activeCall=document.getElementById('activeCall');
+const answerBtn=document.getElementById('answerBtn');
+const declineBtn=document.getElementById('declineBtn');
+const endCallBtn=document.getElementById('endCallBtn');
+const audio=document.getElementById('audio');
+const ripple=document.getElementById('ripple');
+const activeStatue=document.getElementById('activeStatue');
+
 let audioContext, analyser, source, dataArray;
 
-function setupAudioVisualizer() {
-  audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  analyser = audioContext.createAnalyser();
-  source = audioContext.createMediaElementSource(audio);
+function setupAudioVisualizer(){
+  audioContext=new (window.AudioContext||window.webkitAudioContext)();
+  analyser=audioContext.createAnalyser();
+  source=audioContext.createMediaElementSource(audio);
   source.connect(analyser);
   analyser.connect(audioContext.destination);
-  analyser.fftSize = 256;
-  const bufferLength = analyser.frequencyBinCount;
-  dataArray = new Uint8Array(bufferLength);
-
-  function animateRipples() {
+  analyser.fftSize=256;
+  const bufferLength=analyser.frequencyBinCount;
+  dataArray=new Uint8Array(bufferLength);
+  function animateRipple(){
     analyser.getByteFrequencyData(dataArray);
-    let sum = dataArray.reduce((a,b)=>a+b,0);
-    let avg = sum / dataArray.length;
-
-    let scaleBase = 1 + avg/250;
-    let opacity = Math.min(1, avg/300);
-
-    ring1.style.transform = `scale(${scaleBase})`;
-    ring1.style.opacity = opacity;
-
-    ring2.style.transform = `scale(${scaleBase * 1.2})`;
-    ring2.style.opacity = opacity * 0.7;
-
-    ring3.style.transform = `scale(${scaleBase * 1.4})`;
-    ring3.style.opacity = opacity * 0.5;
-
-    if (!audio.paused) requestAnimationFrame(animateRipples);
-    else { ring1.style.opacity=0; ring2.style.opacity=0; ring3.style.opacity=0; }
+    let sum=dataArray.reduce((a,b)=>a+b,0);
+    let average=sum/dataArray.length;
+    let scale=1 + (average/200);
+    ripple.style.transform=`scale(${scale})`;
+    ripple.style.opacity=`${Math.min(1, average/100)}`;
+    if(!audio.paused) requestAnimationFrame(animateRipple);
+    else { ripple.style.transform='scale(1)'; ripple.style.opacity='0.7'; }
   }
-
-  animateRipples();
+  animateRipple();
 }
 
-// Answer Call
-answerBtn.addEventListener('click', async () => {
-  if(audioContext && audioContext.state==='suspended') await audioContext.resume();
-
+// Answer call with 1-second delay
+answerBtn.addEventListener('click',()=>{
+  ringAudio.pause();
   incomingCall.classList.remove('active');
   activeCall.classList.add('active');
-  audio.currentTime = 0;
-  audio.play();
+  ripple.style.display='block';
   activeStatue.classList.add('talking');
 
-  if(!audioContext) setupAudioVisualizer();
+  setTimeout(()=>{
+    audio.currentTime=0;
+    audio.play();
+    if(!audioContext) setupAudioVisualizer();
+    else audioContext.resume();
+  },1000);
 });
 
-// Decline Call
-declineBtn.addEventListener('click', () => {
-  alert(translations[selectedLanguage].callDeclined);
+// Decline call back to language selection
+declineBtn.addEventListener('click',()=>{
+  ringAudio.pause();
+  incomingCall.classList.remove('active');
+  languageScreen.classList.add('active');
 });
 
-// End Call
-endCallBtn.addEventListener('click', () => {
+// End call
+endCallBtn.addEventListener('click',()=>{
   audio.pause();
   activeCall.classList.remove('active');
   incomingCall.classList.add('active');
+  ripple.style.display='none';
   activeStatue.classList.remove('talking');
-  ring1.style.opacity=0; ring2.style.opacity=0; ring3.style.opacity=0;
-
-  alert(translations[selectedLanguage].callEnded);
 });
 
 // Stop talking animation when audio ends
-audio.addEventListener('ended', ()=>{
+audio.addEventListener('ended',()=>{
+  ripple.style.display='none';
   activeStatue.classList.remove('talking');
-  ring1.style.opacity=0; ring2.style.opacity=0; ring3.style.opacity=0;
-});
-
-// Resume AudioContext on any click
-document.body.addEventListener('click', ()=>{
-  if(audioContext && audioContext.state==='suspended') audioContext.resume();
 });
 </script>
+
 </body>
 </html>
