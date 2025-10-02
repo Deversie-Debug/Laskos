@@ -14,16 +14,16 @@
   .statue-container { position:relative; width:180px; height:180px; display:flex; justify-content:center; align-items:center; margin:20px 0; }
   .statue-img { width:150px; height:150px; border-radius:50%; border:3px solid #0077cc; z-index:3; }
   
-  /* Softer, small, more visible ripples */
+  /* Small but highly visible ripples */
   .ripple-ring {
     position: absolute;
-    width:100px;
-    height:100px;
-    border-radius:50%;
-    border:2px solid #0077cc;
-    opacity:0.5; /* increased */
-    pointer-events:none;
-    z-index:1;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px solid #0077cc;
+    opacity: 0.8;  /* base visibility */
+    pointer-events: none;
+    z-index: 1;
     transform: scale(1);
     transition: transform 0.25s ease-out, opacity 0.25s ease-out;
   }
@@ -163,17 +163,17 @@ function setupAudioVisualizer() {
     let sum = dataArray.reduce((a,b)=>a+b,0);
     let avg = sum / dataArray.length;
 
-    let scaleBase = 1 + avg/300;
-    let opacity = Math.min(0.8, avg/500); // increased max opacity
+    let scaleBase = 1 + avg/300;  
+    let opacity = Math.min(1, avg/400); // strong visibility
 
     ring1.style.transform = `scale(${scaleBase})`;
     ring1.style.opacity = opacity;
 
-    ring2.style.transform = `scale(${scaleBase * 1.2})`;
-    ring2.style.opacity = opacity * 0.6;
+    ring2.style.transform = `scale(${scaleBase * 1.1})`;
+    ring2.style.opacity = opacity * 0.7;
 
-    ring3.style.transform = `scale(${scaleBase * 1.4})`;
-    ring3.style.opacity = opacity * 0.3;
+    ring3.style.transform = `scale(${scaleBase * 1.2})`;
+    ring3.style.opacity = opacity * 0.5;
 
     if (!audio.paused) requestAnimationFrame(animateRipples);
     else { ring1.style.opacity=0; ring2.style.opacity=0; ring3.style.opacity=0; }
