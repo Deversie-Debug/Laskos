@@ -30,12 +30,11 @@
   .preloader-text {
     font-family: 'Playfair Display', serif;
     font-weight: 900;
-    font-size: clamp(30px, 12vw, 120px); /* responsive */
+    font-size: clamp(30px, 10vw, 120px); /* scales to fit screen */
     color: #ffffff;
-    white-space: nowrap;
+    white-space: nowrap; /* prevent wrapping */
     text-align: center;
     display: flex;
-    flex-wrap: wrap; /* allows text + logo to wrap */
     align-items: center;
     justify-content: center;
     text-shadow: 0 0 8px rgba(255,255,255,0.6), 0 0 12px rgba(255,255,255,0.3);
@@ -119,7 +118,7 @@
 <audio id="ringAudio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
 
 <script>
-// Preloader
+// Preloader animation
 const preloaderText = document.getElementById('preloaderText');
 const text = preloaderText.textContent;
 preloaderText.textContent = '';
