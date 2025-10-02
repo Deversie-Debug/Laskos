@@ -65,6 +65,13 @@ button { padding:15px 25px; border-radius:50px; border:none; color:white; font-w
 .decline { background-color:#dc3545; }
 .end-call { background-color:#ff9933; min-width:180px; }
 
+.audio-status {
+  margin-top: 15px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
 .incoming-call .statue-img { animation: bounce 1s infinite; box-shadow: 0 0 15px #0077cc; transition: box-shadow 0.3s ease; }
 .talking { animation: talk 0.6s infinite alternate; }
 
@@ -104,6 +111,7 @@ button { padding:15px 25px; border-radius:50px; border:none; color:white; font-w
     <button class="answer" id="answerBtn">Answer</button>
     <button class="decline" id="declineBtn">Decline</button>
   </div>
+  <div class="audio-status" id="audioStatus"></div>
 </div>
 
 <!-- Active Call -->
@@ -114,6 +122,7 @@ button { padding:15px 25px; border-radius:50px; border:none; color:white; font-w
     <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.jpg" alt="Statue" class="statue-img" id="activeStatue">
   </div>
   <button class="end-call" id="endCallBtn">End Call</button>
+  <div class="audio-status" id="audioStatusActive"></div>
 </div>
 
 <!-- Audio -->
@@ -175,6 +184,8 @@ const endCallBtn=document.getElementById('endCallBtn');
 const audio=document.getElementById('audio');
 const ripple=document.getElementById('ripple');
 const activeStatue=document.getElementById('activeStatue');
+const audioStatus = document.getElementById('audioStatus');
+const audioStatusActive = document.getElementById('audioStatusActive');
 
 let audioContext, analyser, source, dataArray;
 
@@ -211,7 +222,14 @@ answerBtn.addEventListener('click',()=>{
 
   // Play audio immediately
   audio.currentTime = 0;
-  audio.play().catch(err => console.log("Audio play blocked:", err));
+  audio.play().then(()=>{
+    audioStatus.textContent = "Audio is playing ✅";
+    audioStatusActive.textContent = "Audio is playing ✅";
+  }).catch(err => {
+    console.log("Audio play blocked:", err);
+    audioStatus.textContent = "Audio not playing ❌";
+    audioStatusActive.textContent = "Audio not playing ❌";
+  });
 
   // Show ripple immediately
   ripple.style.display='block';
@@ -227,6 +245,8 @@ declineBtn.addEventListener('click',()=>{
   languageScreen.classList.add('active');
   ripple.style.display='none';
   activeStatue.classList.remove('talking');
+  audioStatus.textContent = "";
+  audioStatusActive.textContent = "";
 });
 
 // End call
@@ -238,12 +258,16 @@ endCallBtn.addEventListener('click',()=>{
   languageScreen.classList.add('active');
   ripple.style.display='none';
   activeStatue.classList.remove('talking');
+  audioStatus.textContent = "";
+  audioStatusActive.textContent = "";
 });
 
 // Stop talking animation when audio ends
 audio.addEventListener('ended',()=>{
   ripple.style.display='none';
   activeStatue.classList.remove('talking');
+  audioStatus.textContent = "Audio ended";
+  audioStatusActive.textContent = "Audio ended";
 });
 </script>
 
