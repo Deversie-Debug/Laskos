@@ -14,18 +14,18 @@
   .statue-container { position:relative; width:180px; height:180px; display:flex; justify-content:center; align-items:center; margin:20px 0; }
   .statue-img { width:150px; height:150px; border-radius:50%; border:3px solid #0077cc; z-index:3; }
   
-  /* Softer, smaller ripples */
+  /* Softer, smaller, more visible ripples */
   .ripple-ring {
     position: absolute;
     width:100px;
     height:100px;
     border-radius:50%;
     border:2px solid #0077cc;
-    opacity:0.8;
+    opacity:0.35;
     pointer-events:none;
     z-index:1;
     transform: scale(1);
-    transition: transform 0.25s ease-out, opacity 0.85s ease-out;
+    transition: transform 0.25s ease-out, opacity 0.25s ease-out;
   }
   .ripple-ring:nth-child(2) { border-color:#3399ff; }
   .ripple-ring:nth-child(3) { border-color:#66ccff; }
@@ -55,9 +55,9 @@
 <!-- Incoming Call -->
 <div class="screen" id="incomingCall">
   <h1>Incoming Call</h1>
-  <p id="callName">Statue of Liberty</p>
+  <p id="callName">Vasilis Laskos</p>
   <div class="statue-container incoming-call">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a1/Statue_of_Liberty_7.jpg" alt="Statue" class="statue-img" id="incomingStatue">
+    <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.jpg" alt="Statue" class="statue-img" id="incomingStatue">
   </div>
   <div>
     <button class="answer" id="answerBtn">Answer</button>
@@ -72,7 +72,7 @@
     <div class="ripple-ring" id="ring1"></div>
     <div class="ripple-ring" id="ring2"></div>
     <div class="ripple-ring" id="ring3"></div>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a1/Statue_of_Liberty_7.jpg" alt="Statue" class="statue-img" id="activeStatue">
+    <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.jpg" alt="Statue" class="statue-img" id="activeStatue">
   </div>
   <button class="end-call" id="endCallBtn">End Call</button>
 </div>
@@ -113,7 +113,7 @@ const translations = {
     endCall: "End Call",
     callDeclined: "Call Declined",
     callEnded: "Call Ended",
-    statueName: "Statue of Liberty"
+    statueName: "Vasilis Laskos"
   },
   gr: {
     selectLanguage: "Επιλέξτε Γλώσσα",
@@ -124,7 +124,7 @@ const translations = {
     endCall: "Τερματισμός Κλήσης",
     callDeclined: "Κλήση Απορρίφθηκε",
     callEnded: "Κλήση Τερματίστηκε",
-    statueName: "Άγαλμα της Ελευθερίας"
+    statueName: "Βασίλης Λάσκος"
   }
 };
 
@@ -164,8 +164,8 @@ function setupAudioVisualizer() {
     let sum = dataArray.reduce((a,b)=>a+b,0);
     let avg = sum / dataArray.length;
 
-    let scaleBase = 1 + avg/300; // smaller scale
-    let opacity = Math.min(0.3, avg/600); // even softer
+    let scaleBase = 1 + avg/300;
+    let opacity = Math.min(0.6, avg/500); // more visible
 
     ring1.style.transform = `scale(${scaleBase})`;
     ring1.style.opacity = opacity;
@@ -225,7 +225,3 @@ document.body.addEventListener('click', ()=>{
 </script>
 </body>
 </html>
-
-
-
-
