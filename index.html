@@ -13,7 +13,8 @@
   .flag:hover { transform: scale(1.1); border:2px solid #0077cc; }
   .statue-container { position:relative; width:180px; height:180px; display:flex; justify-content:center; align-items:center; margin:20px 0; }
   .statue-img { width:150px; height:150px; border-radius:50%; border:3px solid #0077cc; z-index:3; }
-  .ripple-ring { position:absolute; width:150px; height:150px; border-radius:50%; border:4px solid #0077cc; opacity:0.4; pointer-events:none; z-index:1; transform: scale(1); transition: transform 0.05s linear, opacity 0.05s linear; display:block; }
+  /* Smaller and smoother ripples */
+  .ripple-ring { position:absolute; width:120px; height:120px; border-radius:50%; border:3px solid #0077cc; opacity:0.3; pointer-events:none; z-index:1; transform: scale(1); transition: transform 0.2s ease-out, opacity 0.2s ease-out; }
   .ripple-ring:nth-child(2) { border-color:#3399ff; }
   .ripple-ring:nth-child(3) { border-color:#66ccff; }
   button { padding:15px 25px; border-radius:50px; border:none; color:white; font-weight:bold; font-size:18px; cursor:pointer; margin:10px; min-width:120px; }
@@ -150,16 +151,16 @@ function setupAudioVisualizer() {
     let sum = dataArray.reduce((a,b)=>a+b,0);
     let avg = sum / dataArray.length;
 
-    let scaleBase = 1 + avg/80;
-    let opacity = Math.min(0.9, avg/150);
+    let scaleBase = 1 + avg/200; // smaller scale
+    let opacity = Math.min(0.6, avg/300); // smaller opacity
 
     ring1.style.transform = `scale(${scaleBase})`;
     ring1.style.opacity = opacity;
 
-    ring2.style.transform = `scale(${scaleBase * 1.4})`;
+    ring2.style.transform = `scale(${scaleBase * 1.3})`;
     ring2.style.opacity = opacity * 0.6;
 
-    ring3.style.transform = `scale(${scaleBase * 1.8})`;
+    ring3.style.transform = `scale(${scaleBase * 1.6})`;
     ring3.style.opacity = opacity * 0.4;
 
     if (!audio.paused) requestAnimationFrame(animateRipples);
@@ -171,7 +172,7 @@ function setupAudioVisualizer() {
 
 // Answer Call
 answerBtn.addEventListener('click', async () => {
-  if(audioContext && audioContext.state === 'suspended') await audioContext.resume();
+  if(audioContext && audioContext.state==='suspended') await audioContext.resume();
 
   incomingCall.classList.remove('active');
   activeCall.classList.add('active');
