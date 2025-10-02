@@ -30,9 +30,9 @@
   .preloader-text {
     font-family: 'Playfair Display', serif;
     font-weight: 900;
-    font-size: clamp(30px, 10vw, 120px); /* scales to fit screen */
+    font-size: clamp(30px, 10vw, 120px);
     color: #ffffff;
-    white-space: nowrap; /* prevent wrapping */
+    white-space: nowrap;
     text-align: center;
     display: flex;
     align-items: center;
@@ -55,7 +55,7 @@
 
   .statue-container { position: relative; width:180px; height:180px; display:flex; justify-content:center; align-items:center; }
   .statue-img { width:150px; height:150px; border-radius:50%; border:3px solid #0077cc; z-index:2; }
-  .ripple { position:absolute; width:150px; height:150px; border-radius:50%; border:2px solid #0077cc; opacity:0.7; z-index:1; transform: scale(1); transition: transform 0.1s, opacity 0.1s; }
+  .ripple { position:absolute; width:150px; height:150px; border-radius:50%; border:2px solid #0077cc; opacity:0.7; z-index:1; transform: scale(1); transition: transform 0.1s, opacity 0.1s; display:none; }
 
   button { padding:15px 25px; border-radius:50px; border:none; color:white; font-weight:bold; font-size:18px; cursor:pointer; margin:10px; min-width:120px; }
   .answer { background-color:#28a745; }
@@ -147,7 +147,7 @@ setTimeout(()=>{
   },500);
 }, animationIndex*150 + 500);
 
-// Language selection with ringing
+// Language selection
 const languageScreen = document.getElementById('languageScreen');
 const incomingCall = document.getElementById('incomingCall');
 const flags = document.querySelectorAll('.flag');
@@ -158,7 +158,7 @@ flags.forEach(flag => {
   flag.addEventListener('click', () => {
     selectedLanguage = flag.dataset.lang;
     languageScreen.classList.remove('active');
-    ringAudio.currentTime=0;
+    ringAudio.currentTime = 0;
     ringAudio.play();
     incomingCall.classList.add('active');
   });
@@ -183,6 +183,7 @@ function setupAudioVisualizer(){
   analyser.connect(audioContext.destination);
   analyser.fftSize=256;
   dataArray=new Uint8Array(analyser.frequencyBinCount);
+
   function animateRipple(){
     analyser.getByteFrequencyData(dataArray);
     let sum=dataArray.reduce((a,b)=>a+b,0);
@@ -195,35 +196,53 @@ function setupAudioVisualizer(){
   animateRipple();
 }
 
-// Answer call with 1-second delay
+// Answer call
 answerBtn.addEventListener('click',()=>{
   ringAudio.pause();
   incomingCall.classList.remove('active');
   activeCall.classList.add('active');
-  ripple.style.display='block';
-  activeStatue.classList.add('talking');
 
+  // Ensure AudioContext is running
+  if(!audioContext) setupAudioVisualizer();
+  else audioContext.resume();
+
+  // Play audio immediately (so no part is lost)
+  audio.currentTime = 0;
+  audio.play().catch(err => console.log("Audio play blocked:", err));
+
+  // Delay only ripple/animation for effect
   setTimeout(()=>{
-    if(!audioContext) setupAudioVisualizer();
-    else audioContext.resume();
-    
-    audio.currentTime = 0;
-    audio.play().catch(err=>console.log("Audio play blocked:", err));
+    ripple.style.display='block';
+    activeStatue.classList.add('talking');
   },1000);
 });
 
 // Decline call
 declineBtn.addEventListener('click',()=>{
-  ringAudio.pause();
+  // Stop all audio
+  audio.pause(); audio.currentTime=0;
+  ringAudio.pause(); ringAudio.currentTime=0;
+
+  // Reset screens
   incomingCall.classList.remove('active');
+  activeCall.classList.remove('active');
   languageScreen.classList.add('active');
+
+  ripple.style.display='none';
+  activeStatue.classList.remove('talking');
 });
 
 // End call
 endCallBtn.addEventListener('click',()=>{
-  audio.pause();
+  // Stop all audio
+  audio.pause(); audio.currentTime=0;
+  ringAudio.pause(); ringAudio.currentTime=0;
+
+  // Reset screens
   activeCall.classList.remove('active');
-  incomingCall.classList.add('active');
+  incomingCall.classList.remove('active');
+  languageScreen.classList.add('active');
+
   ripple.style.display='none';
   activeStatue.classList.remove('talking');
 });
