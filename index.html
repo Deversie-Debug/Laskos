@@ -7,12 +7,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&display=swap" rel="stylesheet">
 <style>
 html, body {
-  margin:0; padding:0; height:100%; width:100%;
+  margin:0; padding:0;
+  width:100vw; height:100vh;
+  overflow:hidden; /* prevent scrolling */
   font-family: Arial, sans-serif;
   background: #e6f0ff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
 /* Preloader */
@@ -23,70 +25,98 @@ html, body {
   background: rgba(0,0,0,0.35);
   display:flex; justify-content:center; align-items:center;
   flex-direction: column;
-  transition: opacity 0.5s ease;
   z-index:9999;
   padding: 20px;
   box-sizing: border-box;
+  transition: opacity 0.5s ease;
 }
 
 .preloader-text {
   font-family: 'Playfair Display', serif;
   font-weight: 900;
-  font-size: clamp(30px, 10vw, 120px);
+  font-size: clamp(30px,10vw,120px);
   color: #ffffff;
   white-space: nowrap;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-shadow: 0 0 8px rgba(255,255,255,0.6), 0 0 12px rgba(255,255,255,0.3);
+  text-shadow: 0 0 8px rgba(255,255,255,0.6),0 0 12px rgba(255,255,255,0.3);
   max-width: calc(100% - 40px);
 }
 
-.preloader-text span { display:inline-block; opacity:0; transform: translateY(20px); animation: appear 0.35s forwards; margin-right: 2px; }
-.preloader-text img { width: clamp(30px,6vw,60px); height:auto; margin:0 10px; opacity:0; transform:translateY(20px); animation:appear 0.35s forwards; }
+.preloader-text span { display:inline-block; opacity:0; transform:translateY(20px); animation: appear 0.35s forwards; margin-right:2px; }
+.preloader-text img { width:clamp(30px,6vw,60px); height:auto; margin:0 10px; opacity:0; transform:translateY(20px); animation:appear 0.35s forwards; }
 
 @keyframes appear { to { opacity:1; transform: translateY(0); } }
 
 /* Screens */
-.screen { display:none; flex-direction: column; justify-content: center; align-items: center; text-align:center; width:100vw; height:100vh; padding:20px; box-sizing:border-box;}
+.screen {
+  display:none;
+  flex-direction: column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  width:100vw;
+  height:100vh;
+  box-sizing:border-box;
+}
 .active { display:flex; }
 
+/* Flags */
 .flags-container { display:flex; gap:20px; }
 .flag { width:60px; height:40px; cursor:pointer; border-radius:5px; border:2px solid transparent; transition: transform 0.2s, border 0.2s; }
 .flag:hover { transform: scale(1.1); border:2px solid #0077cc; }
 
-.statue-container { position: relative; display:flex; justify-content:center; align-items:center; }
-.statue-img { width:150px; height:150px; border-radius:50%; border:3px solid #0077cc; z-index:2; }
+/* Statue and ripple */
+.statue-container {
+  position: relative;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  width:30vw;
+  height:30vw;
+  max-width:300px;
+  max-height:300px;
+}
+.statue-img { width:100%; height:100%; border-radius:50%; z-index:2; }
 
+.ripple-container {
+  position:absolute;
+  top:50%; left:50%;
+  width:100%; height:100%;
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+}
+.ripple-ring {
+  position:absolute;
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  opacity:0.7;
+  transform:scale(0);
+  border:2px solid transparent;
+  background: radial-gradient(circle, rgba(0,119,204,0.6) 0%, rgba(0,204,255,0) 70%);
+  mix-blend-mode: lighten;
+}
+
+/* Buttons */
 button { padding:15px 25px; border-radius:50px; border:none; color:white; font-weight:bold; font-size:18px; cursor:pointer; margin:10px; min-width:120px; }
 .answer { background-color:#28a745; }
 .decline { background-color:#dc3545; }
 .end-call { background-color:#ff9933; min-width:180px; }
 
-.incoming-call .statue-img { animation: bounce 1s infinite; box-shadow: 0 0 15px #0077cc; transition: box-shadow 0.3s ease; }
+/* Animations */
+.incoming-call .statue-img { animation: bounce 1s infinite; box-shadow:0 0 15px #0077cc; transition: box-shadow 0.3s ease; }
 .talking { animation: talk 0.6s infinite alternate; }
 
 @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
 @keyframes talk { 0%{transform:scale(1);} 50%{transform:scale(1.03);} 100%{transform:scale(1);} }
 
-/* Ripple */
-.ripple-container { position: absolute; top:50%; left:50%; pointer-events:none; transform:translate(-50%,-50%); width:150px; height:150px; }
-.ripple-ring {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  opacity: 0.7;
-  transform: scale(0);
-  border: 2px solid transparent;
-  background: radial-gradient(circle, rgba(0,119,204,0.6) 0%, rgba(0,204,255,0) 70%);
-  mix-blend-mode: lighten;
-}
-
 @media(max-width:500px){
-  .statue-img { width:120px; height:120px; }
-  .ripple-container { width:120px; height:120px; }
+  .statue-container { width:40vw; height:40vw; }
+  .statue-img { width:100%; height:100%; }
+  .ripple-container { width:100%; height:100%; }
   .flag { width:45px; height:30px; }
 }
 </style>
@@ -134,7 +164,7 @@ button { padding:15px 25px; border-radius:50px; border:none; color:white; font-w
 <audio id="ringAudio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" loop></audio>
 
 <script>
-// Preloader animation
+// Preloader
 const preloaderText = document.getElementById('preloaderText');
 const text = preloaderText.textContent;
 preloaderText.textContent = '';
@@ -180,7 +210,7 @@ flags.forEach(flag => {
   });
 });
 
-// Ripple effect setup
+// Ripple effect
 const activeCall=document.getElementById('activeCall');
 const answerBtn=document.getElementById('answerBtn');
 const declineBtn=document.getElementById('declineBtn');
@@ -197,7 +227,7 @@ function startRippleVisualizer(){
         source = audioCtx.createMediaElementSource(audio);
         analyser = audioCtx.createAnalyser();
         source.connect(analyser);
-        analyser.connect(audioCtx.destination); // optional
+        analyser.connect(audioCtx.destination);
         analyser.fftSize = 256;
         dataArray = new Uint8Array(analyser.frequencyBinCount);
     }
@@ -272,6 +302,5 @@ audio.addEventListener('ended',()=>{
     activeStatue.classList.remove('talking');
 });
 </script>
-
 </body>
 </html>
