@@ -23,14 +23,13 @@ html, body {
 }
 .screen.active { opacity:1; pointer-events:auto; }
 
-/* Vertically center content */
+/* Vertically center incoming call & active call */
 #incomingCall > div, #activeCall > div {
   flex:1; display:flex; flex-direction: column;
   justify-content: center;
   align-items: center;
 }
 
-/* Titles */
 .screen h1, .screen p { color:white; margin:10px 0; text-align:center; }
 
 .statue-container {
@@ -56,6 +55,7 @@ html, body {
 
 /* Slider */
 .slider-container {
+  display: none; /* hidden by default */
   position:absolute;
   bottom:5%;
   width:80%; max-width:350px;
@@ -64,7 +64,6 @@ html, body {
   border-radius:25px;
   overflow:hidden;
   border:1px solid rgba(255,255,255,0.1);
-  display:none; /* only visible in incoming call */
 }
 
 .slider {
@@ -77,14 +76,12 @@ html, body {
 }
 
 .slider::before {
-  content:'';
-  display:block;
+  content:''; display:block;
   width:0; height:0;
   border-left:12px solid #0d1b2a;
   border-top:7px solid transparent;
   border-bottom:7px solid transparent;
-  position:absolute;
-  left:50%; top:50%;
+  position:absolute; left:50%; top:50%;
   transform: translate(-50%, -50%);
 }
 
@@ -94,26 +91,48 @@ html, body {
   pointer-events:none;
 }
 
-/* Polished X Button */
-.cancel-call {
-  position:absolute;
-  top:15px; right:15px;
-  width:45px; height:45px;
-  background: rgba(255,0,0,0.85);
-  border:none;
-  border-radius:50%;
-  font-size:26px;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-  z-index:10;
-  display:none; /* only in incoming call */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-  transition: transform 0.2s ease, background 0.2s ease;
+/* Decline button */
+.decline-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,0,0,0.8);
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  transition: background 0.3s;
 }
-.cancel-call:hover {
-  transform: scale(1.1);
-  background: rgba(255,0,0,1);
+.decline-btn:hover { background: rgba(255,0,0,1); }
+
+/* Polished End Call button */
+.end-call {
+  padding: 12px 30px;
+  background: #ff4c4c;        
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 25px;         
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.end-call:hover {
+  transform: scale(1.05);
+  background: #ff2b2b;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+}
+.end-call:active {
+  transform: scale(0.95);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.4);
 }
 
 /* Preloader */
@@ -134,7 +153,8 @@ html, body {
   .flag { width:45px; height:30px; }
   .slider-container { width:250px; height:45px; }
   .slider { width:45px; height:45px; }
-  .cancel-call { width:35px; height:35px; font-size:22px; top:10px; right:10px; }
+  .decline-btn { width:35px; height:35px; font-size:20px; top:10px; right:10px; }
+  .end-call { font-size:16px; padding:10px 25px; }
 }
 </style>
 </head>
@@ -148,10 +168,13 @@ html, body {
     <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Animated-Flag-United-Kingdom.gif" class="flag" data-lang="en" alt="English">
     <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/Animated-Flag-Greece.gif" class="flag" data-lang="gr" alt="Greek">
   </div>
+  <div class="slider-container">
+    <div class="slider" id="slider"></div>
+    <div class="slider-text">Slide to Answer</div>
+  </div>
 </div>
 
 <div class="screen" id="incomingCall">
-  <button class="cancel-call" id="cancelCallBtn">✕</button>
   <div>
     <h1>Incoming Call</h1>
     <p id="callName">Vasilis Laskos / Βασίλης Λάσκος</p>
@@ -159,7 +182,11 @@ html, body {
       <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/LaskosGR.jpg" alt="Statue" class="statue-img" id="incomingStatue">
     </div>
   </div>
-  <div class="slider-container" id="incomingSliderContainer">
+
+  <!-- Decline button -->
+  <button id="declineBtn" class="decline-btn">&times;</button>
+
+  <div class="slider-container">
     <div class="slider" id="sliderIncoming"></div>
     <div class="slider-text">Slide to Answer</div>
   </div>
@@ -188,10 +215,9 @@ const flagsContainer = document.querySelector('.flags-container');
 const flags = document.querySelectorAll('.flag');
 const activeStatue = document.getElementById('activeStatue');
 const endCallBtn = document.getElementById('endCallBtn');
+const declineBtn = document.getElementById('declineBtn');
 
-const sliderContainer = document.getElementById('incomingSliderContainer');
-const slider = document.getElementById('sliderIncoming');
-const cancelCallBtn = document.getElementById('cancelCallBtn');
+const sliderElems = document.querySelectorAll('.slider');
 
 let isDragging=false, startX=0, sliderMax, rippleAnimationFrame;
 
@@ -219,9 +245,7 @@ function restartPreloader(){
     flagsContainer.classList.remove('show');
     flags.forEach(f=>f.style.pointerEvents='none');
 
-    slider.style.left='0px'; // reset slider
-    sliderContainer.style.display='none';
-    cancelCallBtn.style.display='none';
+    sliderElems.forEach(s=>s.style.left='0px'); // reset slider
 
     animateLettersSequential('LIVING','preloaderTop', ()=>{
         logo.style.animation='appear 0.35s forwards';
@@ -244,15 +268,13 @@ flags.forEach(flag=>{
       preloader.style.display='none';
       showScreen(incomingCall);
       document.getElementById('incomingStatue').classList.add('show');
-      sliderContainer.style.display='block';
-      cancelCallBtn.style.display='block';
-      slider.style.left='0px';
       preloader.classList.remove('fade-out');
+      sliderElems.forEach(s=>s.style.left='0px'); // reset slider
     }, {once:true});
   });
 });
 
-// Slider logic reverted
+// Slider logic
 function initSlider(slider){
     sliderMax = slider.parentElement.offsetWidth - slider.offsetWidth;
 
@@ -274,23 +296,21 @@ function initSlider(slider){
         isDragging=false;
         let dx = parseFloat(slider.style.left) || 0;
         if(dx >= sliderMax){
-            slider.style.left = '0px'; // reset only after reaching end
-            startCall();
+            slider.style.left = sliderMax + 'px';
+            startCall(); // only trigger when fully slid
         } else {
-            slider.style.left = '0px'; // snap back
+            slider.style.left = '0px';
         }
     });
 
     slider.addEventListener('pointercancel', ()=>{ isDragging=false; slider.style.left='0px'; });
 }
 
-initSlider(slider);
+sliderElems.forEach(initSlider);
 
 // Start call
 function startCall(){
     incomingCall.classList.remove('active');
-    sliderContainer.style.display='none';
-    cancelCallBtn.style.display='none';
     showScreen(activeCall);
     activeStatue.classList.add('show','talking');
     audio.currentTime=0;
@@ -309,25 +329,27 @@ function startCall(){
     rippleLoop();
 }
 
+// Stop ripple when audio ends
 audio.addEventListener('ended', ()=>{
     activeStatue.classList.remove('talking');
     cancelAnimationFrame(rippleAnimationFrame);
-});
-
-// Cancel call via X button
-cancelCallBtn.addEventListener('click', ()=>{
-    incomingCall.classList.remove('active');
-    sliderContainer.style.display='none';
-    cancelCallBtn.style.display='none';
-    preloader.style.display='flex';
-    slider.style.left='0px';
-    restartPreloader();
 });
 
 // End call → back to preloader
 endCallBtn.addEventListener('click', ()=>{
     audio.pause(); audio.currentTime=0; cancelAnimationFrame(rippleAnimationFrame);
     activeCall.classList.remove('active'); preloader.style.display='flex';
+    sliderElems.forEach(s=>s.style.left='0px'); // reset slider
+    requestAnimationFrame(()=>{ preloader.classList.remove('fade-out'); });
+    restartPreloader();
+});
+
+// Decline incoming call → back to preloader
+declineBtn.addEventListener('click', ()=>{
+    incomingCall.classList.remove('active');
+    preloader.style.display='flex';
+    sliderElems.forEach(s=>s.style.left='0px'); // reset slider
+    requestAnimationFrame(()=>{ preloader.classList.remove('fade-out'); });
     restartPreloader();
 });
 </script>
