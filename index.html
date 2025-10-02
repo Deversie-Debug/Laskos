@@ -12,9 +12,7 @@ html, body {
   overflow:hidden;
   font-family: Arial, sans-serif;
   background: #e6f0ff;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  display:flex; justify-content:center; align-items:center;
 }
 
 /* Preloader */
@@ -26,9 +24,22 @@ html, body {
   display:flex; justify-content:center; align-items:center;
   flex-direction: column;
   z-index:9999;
+  padding:20px;
   box-sizing:border-box;
+  opacity:1;
+  transform: translateY(0);
+  transition: opacity 1s ease, transform 1s ease;
+}
+#preloader.fade-out {
+  opacity:0;
+  transform: translateY(-40px);
+}
+#preloader.fade-in {
+  opacity:1;
+  transform: translateY(0);
 }
 
+/* Preloader text */
 .preloader-text { 
   font-family: 'Playfair Display', serif;
   font-weight:900;
@@ -58,32 +69,84 @@ html, body {
 
 @keyframes appear { to { opacity:1; transform: translateY(0); } }
 
-/* General screen container */
-.screen {
-  display:none; 
-  width:100vw; 
-  height:100vh; 
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  box-sizing:border-box;
+/* Flags lower */
+.flags-container { 
+  display:flex; gap:20px; 
+  margin-top:auto;
+  margin-bottom:50px;
+  opacity:0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
-.active { display:flex; }
-
-/* Flags container */
-.flags-container { display:flex; gap:20px; }
-.flag { width:60px; height:40px; cursor:pointer; border-radius:5px; border:2px solid transparent; transition: transform 0.2s, border 0.2s; }
+.flags-container.show {
+  opacity:1;
+  transform: translateY(0);
+}
+.flag { 
+  width:60px; height:40px; 
+  cursor:pointer; 
+  border-radius:5px; 
+  border:2px solid transparent; 
+  transition: transform 0.2s, border 0.2s; 
+}
 .flag:hover { transform: scale(1.1); border:2px solid #0077cc; }
 
-/* Statue */
-.statue-container { display:flex; justify-content:center; align-items:center; width:30vw; height:30vw; max-width:300px; max-height:300px; margin:20px 0; }
-.statue-img { width:100%; height:100%; border-radius:50%; }
+/* Screens */
+.screen {
+  display:flex; 
+  flex-direction: column; 
+  align-items: center;
+  text-align:center; 
+  width:100vw; 
+  height:100vh; 
+  box-sizing:border-box;
+  position:absolute;
+  top:0; left:0;
+  opacity:0;
+  pointer-events:none;
+  transition: opacity 0.8s ease;
+  background: rgba(0,0,0,0.35); /* same as preloader */
+}
+.screen.active {
+  opacity:1;
+  pointer-events:auto;
+}
 
-/* Buttons */
-.buttons { display:flex; justify-content:center; margin-top:20px; }
-button { padding:15px 25px; border-radius:50px; border:none; color:white; font-weight:bold; font-size:18px; cursor:pointer; margin:10px; min-width:120px; }
+/* Titles higher */
+.screen h1, .screen p {
+  margin-top:40px;
+  margin-bottom:20px;
+  color:white;
+}
+
+/* Statue centered */
+.statue-container { 
+  position: relative; 
+  display:flex; justify-content:center; align-items:center; 
+  width:30vw; height:30vw; 
+  max-width:300px; max-height:300px; 
+  margin:auto 0; /* centers vertically */
+}
+.statue-img { width:100%; height:100%; border-radius:50%; z-index:2; }
+
+/* Buttons lower */
+.buttons { 
+  display:flex; 
+  justify-content:center; 
+  margin-top:auto; 
+  margin-bottom:40px; 
+}
+button { 
+  padding:15px 25px; 
+  border-radius:50px; 
+  border:none; 
+  color:white; 
+  font-weight:bold; 
+  font-size:18px; 
+  cursor:pointer; 
+  margin:10px; 
+  min-width:120px; 
+}
 .answer { background-color:#28a745; }
 .decline { background-color:#dc3545; }
 .end-call { background-color:#ff9933; min-width:180px; }
@@ -109,10 +172,6 @@ button { padding:15px 25px; border-radius:50px; border:none; color:white; font-w
   <div class="preloader-text" id="preloaderTop"></div>
   <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/Logo.png" class="preloader-logo" id="preloaderLogo">
   <div class="preloader-text" id="preloaderBottom"></div>
-</div>
-
-<!-- Language Selection -->
-<div class="screen" id="languageScreen">
   <div class="flags-container">
     <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Animated-Flag-United-Kingdom.gif" class="flag" data-lang="en" alt="English">
     <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/Animated-Flag-Greece.gif" class="flag" data-lang="gr" alt="Greek">
@@ -159,36 +218,39 @@ function animateLetters(text, containerId, delayStart){
   }
 }
 
-// Animate preloader
+// Animate text + logo
 animateLetters('LIVING','preloaderTop',0);
 const logo = document.getElementById('preloaderLogo');
 logo.style.animation = 'appear 0.35s forwards';
 logo.style.animationDelay = '1s';
 animateLetters('STATUES','preloaderBottom',1.5);
 
-// Hide preloader after animation
+// Show flags after animation
 setTimeout(()=>{
-  document.getElementById('preloader').style.opacity='0';
-  setTimeout(()=>{ 
-    document.getElementById('preloader').style.display='none';
-    document.getElementById('languageScreen').classList.add('active'); 
-  },500);
-}, 3500);
+  document.querySelector('.flags-container').classList.add('show');
+}, 3000);
 
-// Language selection
-const languageScreen=document.getElementById('languageScreen');
-const incomingCall=document.getElementById('incomingCall');
+// Flags → crossfade into call
 const flags=document.querySelectorAll('.flag');
+const preloader=document.getElementById('preloader');
+const incomingCall=document.getElementById('incomingCall');
 let selectedLanguage='en';
+
 flags.forEach(flag=>{
   flag.addEventListener('click',()=>{
     selectedLanguage=flag.dataset.lang;
-    languageScreen.classList.remove('active');
+
+    // Crossfade: preloader fades out, call fades in
+    preloader.classList.add('fade-out');
     incomingCall.classList.add('active');
+
+    preloader.addEventListener('transitionend', ()=>{
+      preloader.style.display='none';
+    }, { once:true });
   });
 });
 
-// Buttons and Audio
+// Active call controls
 const activeCall=document.getElementById('activeCall');
 const answerBtn=document.getElementById('answerBtn');
 const declineBtn=document.getElementById('declineBtn');
@@ -205,20 +267,27 @@ answerBtn.addEventListener('click',()=>{
     activeStatue.classList.add('talking');
 });
 
-// Decline call
+// Decline call → back to preloader smooth
 declineBtn.addEventListener('click',()=>{
     audio.pause(); audio.currentTime=0;
     incomingCall.classList.remove('active');
-    activeCall.classList.remove('active');
-    languageScreen.classList.add('active');
+    preloader.style.display='flex';
+    requestAnimationFrame(()=>{
+      preloader.classList.remove('fade-out');
+      preloader.classList.add('fade-in');
+    });
     activeStatue.classList.remove('talking');
 });
 
-// End call
+// End call → back to preloader smooth
 endCallBtn.addEventListener('click',()=>{
     audio.pause(); audio.currentTime=0;
     activeCall.classList.remove('active');
-    languageScreen.classList.add('active');
+    preloader.style.display='flex';
+    requestAnimationFrame(()=>{
+      preloader.classList.remove('fade-out');
+      preloader.classList.add('fade-in');
+    });
     activeStatue.classList.remove('talking');
 });
 
