@@ -112,9 +112,17 @@ html, body {
 
 .preloader-text {
   font-family: 'Playfair Display', serif;
-  font-weight:900; font-size:clamp(30px,10vw,100px);
-  color:#fff; text-align:center; text-shadow:0 0 8px rgba(255,255,255,0.6),0 0 12px rgba(255,255,255,0.3);
-  display:flex; justify-content:center; flex-wrap: nowrap; margin:5px 0;
+  font-weight:900; 
+  font-size:clamp(30px,10vw,100px);
+  color:#ddd; /* dimmer than white */
+  text-align:center;
+  text-shadow:
+    0 0 4px rgba(255,255,255,0.3),
+    0 0 8px rgba(255,255,255,0.15); /* softer glow */
+  display:flex; 
+  justify-content:center; 
+  flex-wrap: nowrap; 
+  margin:5px 0;
 }
 .preloader-text span { display:inline-block; opacity:0; transform:translateY(20px); animation: appear 0.35s forwards; margin:0 2px; }
 .preloader-logo { width:clamp(40px,10vw,80px); margin:10px 0; opacity:0; transform:translateY(20px); animation:appear 0.35s forwards; }
@@ -378,4 +386,3 @@ document.addEventListener('click', (e) => {
 </script>
 </body>
 </html>
-
