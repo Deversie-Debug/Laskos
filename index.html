@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="GR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,7 +26,6 @@ header {
   position:fixed;
   top:0; left:0;
   width:100%;
-  max-width:100vw;
   background:rgba(13,27,42,0.95);
   display:flex;
   justify-content:space-between;
@@ -45,6 +44,13 @@ nav {
   display:flex;
   flex-wrap: wrap;
   align-items:center;
+  justify-content:center; /* center items in desktop */
+  width:100%;
+}
+nav .nav-items {
+  display:flex;
+  flex-direction: row;
+  align-items:center;
 }
 nav a {
   margin:0 12px;
@@ -56,33 +62,25 @@ nav a {
   transition: transform 0.3s ease;
 }
 nav a::after {
-  content:'';
-  position:absolute;
-  left:0; bottom:-4px;
-  width:0; height:2px;
-  background:white;
-  transition: width 0.3s ease;
+  content:''; position:absolute; left:0; bottom:-4px;
+  width:0; height:2px; background:white; transition: width 0.3s ease;
 }
 nav a:hover::after { width:100%; }
 
 /* ================= LANGUAGE SELECT ================= */
 .lang-select {
-  margin-left:15px;
   display:flex;
   font-weight:bold;
   cursor:pointer;
+  margin-left:20px;
 }
 .lang-select span {
-  margin-left:8px;
-  margin-right:8px;
+  margin-left:8px; margin-right:8px;
   position:relative;
 }
 .lang-select span:hover::after {
-  content:'';
-  position:absolute;
-  left:0; bottom:-4px;
-  width:100%; height:2px;
-  background:white;
+  content:''; position:absolute; left:0; bottom:-4px;
+  width:100%; height:2px; background:white;
 }
 
 /* ================= BURGER MENU ================= */
@@ -90,34 +88,39 @@ nav a:hover::after { width:100%; }
 .burger div { width:25px; height:3px; background:white; margin:4px 0; transition: all 0.3s ease; }
 
 @media(max-width:768px){
-  nav {
-    display:none;
-    flex-direction: column;
-    background: rgba(13,27,42,0.95);
-    position: absolute;
-    top:60px;
-    right:0;
-    width:200px; /* adjust as needed */
-    box-sizing: border-box;
-    align-items: flex-end; /* menu items right-aligned */
-    padding: 10px 15px;
+  nav { 
+    display:none; 
+    flex-direction: column; 
+    background: rgba(13,27,42,0.95); 
+    position: absolute; 
+    top:60px; 
+    left:0; 
+    width:100%; 
+    max-width:100vw; /* ensure it does not overflow */
+    box-sizing: border-box; 
+    padding: 10px 10px; /* small padding to prevent overflow */
   }
-
   nav.show { display:flex; }
 
-  nav a {
-    margin:10px 0;
+  nav .nav-items {
+    flex-direction: column;
+    align-items:flex-end; /* right-align menu items */
+    width:100%;
+    padding:0 10px; /* small padding to keep items in viewport */
+    box-sizing: border-box;
+  }
+
+  .nav-items a {
+    word-wrap: break-word; /* prevent very long text overflow */
   }
 
   .lang-select {
-    width: 100%;
-    justify-content: center; /* center language selector */
-    margin: 15px 0;
+    margin:10px auto; /* center horizontally */
+    justify-content:center;
   }
 
   .burger { display:flex; }
 }
-
 
 
 /* ================= SECTIONS ================= */
@@ -127,10 +130,10 @@ section {
   justify-content:center; align-items:center;
   padding:50px 20px;
   text-align:center;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 section h1, section h2 { margin-bottom:20px; font-family: 'Spartacus', serif; }
-section p { max-width:700px; margin:0 auto; line-height:1.6; transition: opacity 0.5s ease; }
+section p { max-width:700px; margin:0 auto; line-height:1.6; transition: opacity 0.5s ease, transform 0.5s ease; }
 
 /* ================= HERO ================= */
 #home h1 { font-size:clamp(50px,10vw,120px); }
@@ -144,7 +147,7 @@ section p { max-width:700px; margin:0 auto; line-height:1.6; transition: opacity
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
   max-width: 600px;
   text-align: center;
-  transition: opacity 0.5s ease;
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 .maintenance-box p {
   color: #0d1b2a;
@@ -174,15 +177,17 @@ section p { max-width:700px; margin:0 auto; line-height:1.6; transition: opacity
 <header id="navbar">
   <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/Logo.png" alt="Logo" class="logo">
   <nav id="menu">
-    <a href="#home" id="menuHome">Αρχική</a>
-    <a href="#about" id="menuAbout">Σχετικά</a>
-    <a href="#services" id="menuServices">Υπηρεσίες</a>
-    <a href="CallFunction.html" id="menuExperience">Εμπειρία</a>
-    <a href="#contact" id="menuContact">Επικοινωνία</a>
+    <div class="nav-items">
+      <a href="#home" id="menuHome">Αρχική</a>
+      <a href="#about" id="menuAbout">Σχετικά</a>
+      <a href="#services" id="menuServices">Υπηρεσίες</a>
+      <a href="CallFunction.html" id="menuExperience">Εμπειρία</a>
+      <a href="#contact" id="menuContact">Επικοινωνία</a>
+    </div>
+    <div class="lang-select">
+      <span id="langGR">GR</span> | <span id="langEN">EN</span>
+    </div>
   </nav>
-  <div class="lang-select">
-    <span id="langGR">GR</span> | <span id="langEN">EN</span>
-  </div>
   <div class="burger" id="burger">
     <div></div><div></div><div></div>
   </div>
@@ -253,56 +258,32 @@ document.querySelectorAll('nav a[href^="#"]').forEach(anchor=>{
 // ================= AUTO TRANSLATE =================
 const translations = {
   GR: {
-    menuHome: "Αρχική",
-    menuAbout: "Σχετικά",
-    menuServices: "Υπηρεσίες",
-    menuExperience: "Εμπειρία",
-    menuContact: "Επικοινωνία",
-    homeTitle: "LIVING STATUES",
-    homeText: "Φέρνοντας την ιστορία στη ζωή μέσω της τεχνολογίας.",
-    homeMaint: "Ο ιστότοπος βρίσκεται υπό κατασκευή. Επιστρέψτε αργότερα.",
-    aboutTitle: "Σχετικά με εμάς",
-    aboutText: "Δημιουργούμε αξέχαστες εμπειρίες με ζωντανά αγάλματα που αφηγούνται ιστορίες.",
-    aboutMaint: "Η ενότητα βρίσκεται υπό κατασκευή.",
-    servicesTitle: "Οι Υπηρεσίες μας",
-    servicesText: "Από διαδραστικές παραστάσεις έως εικονική αφήγηση, παρέχουμε μοναδικές εμπειρίες.",
-    servicesMaint: "Η ενότητα βρίσκεται υπό κατασκευή.",
-    contactTitle: "Επικοινωνία",
-    contactText: "Επικοινωνήστε μαζί μας για συνεργασίες, κρατήσεις ή περισσότερες πληροφορίες.",
-    contactMaint: "Η ενότητα βρίσκεται υπό κατασκευή."
+    menuHome: "Αρχική", menuAbout: "Σχετικά", menuServices: "Υπηρεσίες", menuExperience: "Εμπειρία", menuContact: "Επικοινωνία",
+    homeTitle: "LIVING STATUES", homeText: "Φέρνοντας την ιστορία στη ζωή μέσω της τεχνολογίας.", homeMaint: "Ο ιστότοπος βρίσκεται υπό κατασκευή. Επιστρέψτε αργότερα.",
+    aboutTitle: "Σχετικά με εμάς", aboutText: "Δημιουργούμε αξέχαστες εμπειρίες με ζωντανά αγάλματα που αφηγούνται ιστορίες.", aboutMaint: "Η ενότητα βρίσκεται υπό κατασκευή.",
+    servicesTitle: "Οι Υπηρεσίες μας", servicesText: "Από διαδραστικές παραστάσεις έως εικονική αφήγηση, παρέχουμε μοναδικές εμπειρίες.", servicesMaint: "Η ενότητα βρίσκεται υπό κατασκευή.",
+    contactTitle: "Επικοινωνία", contactText: "Επικοινωνήστε μαζί μας για συνεργασίες, κρατήσεις ή περισσότερες πληροφορίες.", contactMaint: "Η ενότητα βρίσκεται υπό κατασκευή."
   },
   EN: {
-    menuHome: "Home",
-    menuAbout: "About",
-    menuServices: "Services",
-    menuExperience: "Experience",
-    menuContact: "Contact",
-    homeTitle: "LIVING STATUES",
-    homeText: "Bringing history to life through technology.",
-    homeMaint: "This site is currently under maintenance. Please check back later.",
-    aboutTitle: "About Us",
-    aboutText: "We create unforgettable experiences with living statues that tell stories and mesmerize audiences worldwide.",
-    aboutMaint: "Section under construction.",
-    servicesTitle: "Our Services",
-    servicesText: "From interactive performances to virtual storytelling, we provide unique experiences for everyone.",
-    servicesMaint: "Section under construction.",
-    contactTitle: "Contact",
-    contactText: "Reach out for collaborations, bookings, or more information.",
-    contactMaint: "Section under construction."
+    menuHome: "Home", menuAbout: "About", menuServices: "Services", menuExperience: "Experience", menuContact: "Contact",
+    homeTitle: "LIVING STATUES", homeText: "Bringing history to life through technology.", homeMaint: "This site is currently under maintenance. Please check back later.",
+    aboutTitle: "About Us", aboutText: "We create unforgettable experiences with living statues that tell stories and mesmerize audiences worldwide.", aboutMaint: "Section under construction.",
+    servicesTitle: "Our Services", servicesText: "From interactive performances to virtual storytelling, we provide unique experiences for everyone.", servicesMaint: "Section under construction.",
+    contactTitle: "Contact", contactText: "Reach out for collaborations, bookings, or more information.", contactMaint: "Section under construction."
   }
 };
 
-let currentLang = 'GR'; // default language
+let currentLang = 'GR'; // default
 
 function setLanguage(lang){
-  if(lang === currentLang) return; // do nothing if same language
+  if(lang === currentLang) return;
+  currentLang = lang;
 
+  // Elements to animate
   const fadeEls = document.querySelectorAll(
-  'section h1, section h2, section p, nav a, .lang-select span, .maintenance-box, .maintenance-box p'
-);
+    'section h1, section h2, section p, nav a, .lang-select span, .maintenance-box'
+  );
 
-
-  // fade + slide out
   fadeEls.forEach(el=>{
     el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
     el.style.opacity = 0;
@@ -310,29 +291,23 @@ function setLanguage(lang){
   });
 
   setTimeout(()=>{
+    // update text
     for(const key in translations[lang]){
       const el = document.getElementById(key);
       if(el) el.textContent = translations[lang][key];
     }
 
-    // fade + slide in with stagger
     fadeEls.forEach((el, index)=>{
       setTimeout(()=>{
         el.style.opacity = 1;
         el.style.transform = 'translateY(0)';
       }, index*80);
     });
-
-    currentLang = lang;
   }, 400);
 }
 
-// set default language
-setLanguage(currentLang);
-
 document.getElementById('langGR').addEventListener('click', ()=> setLanguage('GR'));
 document.getElementById('langEN').addEventListener('click', ()=> setLanguage('EN'));
-
 </script>
 
 </body>
