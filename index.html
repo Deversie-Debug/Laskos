@@ -18,6 +18,7 @@ html, body {
   color:white;
   overflow-x:hidden;
   scroll-behavior:smooth;
+  transition: color 0.3s ease;
 }
 
 /* ================= NAVBAR ================= */
@@ -28,23 +29,25 @@ header {
   max-width:100vw;
   background:rgba(13,27,42,0.95);
   display:flex;
-  justify-content:flex-start;
+  justify-content:space-between;
   align-items:center;
-  padding:8px 20px; /* header higher */
+  padding:10px 25px;
   z-index:1000;
   box-sizing:border-box;
-  transition: transform 0.4s ease;
   border-bottom:2px solid rgba(255,255,255,0.2);
+  transition: transform 0.4s ease;
 }
 header.hide { transform: translateY(-100%); }
-header img.logo { width:45px; height:auto; margin-right:15px; cursor:pointer; }
+
+header img.logo { width:45px; height:auto; cursor:pointer; }
 
 nav {
   display:flex;
   flex-wrap: wrap;
+  align-items:center;
 }
 nav a {
-  margin:0 10px;
+  margin:0 12px;
   text-decoration:none;
   color:white;
   font-weight:bold;
@@ -62,14 +65,34 @@ nav a::after {
 }
 nav a:hover::after { width:100%; }
 
-/* Burger menu */
+/* ================= LANGUAGE SELECT ================= */
+.lang-select {
+  margin-left:15px;
+  display:flex;
+  font-weight:bold;
+  cursor:pointer;
+}
+.lang-select span {
+  margin-left:8px;
+  margin-right:8px;
+  position:relative;
+}
+.lang-select span:hover::after {
+  content:'';
+  position:absolute;
+  left:0; bottom:-4px;
+  width:100%; height:2px;
+  background:white;
+}
+
+/* ================= BURGER MENU ================= */
 .burger { display:none; flex-direction: column; cursor:pointer; }
 .burger div { width:25px; height:3px; background:white; margin:4px 0; transition: all 0.3s ease; }
 
 @media(max-width:768px){
-  nav { display:none; flex-direction: column; background: rgba(13,27,42,0.95); position: absolute; top: 60px; left:0; width:100%; box-sizing: border-box; }
+  nav { display:none; flex-direction: column; background: rgba(13,27,42,0.95); position: absolute; top:60px; left:0; width:100%; box-sizing: border-box; }
   nav.show { display:flex; }
-  header { justify-content: space-between; }
+  .lang-select { margin:10px 0; justify-content:center; }
   .burger { display:flex; }
 }
 
@@ -80,27 +103,29 @@ section {
   justify-content:center; align-items:center;
   padding:50px 20px;
   text-align:center;
+  transition: opacity 0.5s ease;
 }
 section h1, section h2 { margin-bottom:20px; font-family: 'Spartacus', serif; }
-section p { max-width:700px; margin:0 auto; line-height:1.6; }
+section p { max-width:700px; margin:0 auto; line-height:1.6; transition: opacity 0.5s ease; }
 
 /* ================= HERO ================= */
 #home h1 { font-size:clamp(50px,10vw,120px); }
 
-/* ================= MAINTENANCE BOX ================= */
+/* ================= UNDER CONSTRUCTION BOX ================= */
 .maintenance-box {
-  background: rgba(255,255,255,0.4); /* white with 40% opacity */
-  padding: 20px 30px;
+  background: rgba(255,255,255,0.4);
+  padding: 15px 25px;
   margin-top: 20px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.5);
   max-width: 600px;
   text-align: center;
+  transition: opacity 0.5s ease;
 }
 .maintenance-box p {
-  color: #0d1b2a; /* dark text for contrast */
+  color: #0d1b2a;
   font-weight: bold;
-  font-size: 18px;
+  font-size: 16px;
   margin: 0;
 }
 
@@ -125,12 +150,15 @@ section p { max-width:700px; margin:0 auto; line-height:1.6; }
 <header id="navbar">
   <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/Logo.png" alt="Logo" class="logo">
   <nav id="menu">
-    <a href="#home">Home</a>
-    <a href="#about">About</a>
-    <a href="#services">Services</a>
-    <a href="CallFunction.html">Experience</a> <!-- updated link -->
-    <a href="#contact">Contact</a>
+    <a href="#home" id="menuHome">Αρχική</a>
+    <a href="#about" id="menuAbout">Σχετικά</a>
+    <a href="#services" id="menuServices">Υπηρεσίες</a>
+    <a href="CallFunction.html" id="menuExperience">Εμπειρία</a>
+    <a href="#contact" id="menuContact">Επικοινωνία</a>
   </nav>
+  <div class="lang-select">
+    <span id="langGR">GR</span> | <span id="langEN">EN</span>
+  </div>
   <div class="burger" id="burger">
     <div></div><div></div><div></div>
   </div>
@@ -138,28 +166,27 @@ section p { max-width:700px; margin:0 auto; line-height:1.6; }
 
 <!-- ================= SECTIONS ================= -->
 <section id="home">
-  <h1>LIVING STATUES</h1>
-  <p>Bringing history to life through stunning performances.</p>
-  
-  <!-- Maintenance box -->
-  <div class="maintenance-box">
-    <p>This site is currently under maintenance. Please check back later.</p>
-  </div>
+  <h1 id="homeTitle">LIVING STATUES</h1>
+  <p id="homeText">Φέρνοντας την ιστορία στη ζωή μέσω της τεχνολογίας.</p>
+  <div class="maintenance-box"><p id="homeMaint">Ο ιστότοπος βρίσκεται υπό κατασκευή. Επιστρέψτε αργότερα.</p></div>
 </section>
 
 <section id="about">
-  <h2>About Us</h2>
-  <p>We craft unforgettable experiences with living statues that tell stories and mesmerize audiences worldwide.</p>
+  <h2 id="aboutTitle">Σχετικά με εμάς</h2>
+  <p id="aboutText">Δημιουργούμε αξέχαστες εμπειρίες με ζωντανά αγάλματα που αφηγούνται ιστορίες.</p>
+  <div class="maintenance-box"><p id="aboutMaint">Η ενότητα βρίσκεται υπό κατασκευή.</p></div>
 </section>
 
 <section id="services">
-  <h2>Our Services</h2>
-  <p>From interactive performances to virtual storytelling, we provide unique experiences for everyone.</p>
+  <h2 id="servicesTitle">Οι Υπηρεσίες μας</h2>
+  <p id="servicesText">Από διαδραστικές παραστάσεις έως εικονική αφήγηση, παρέχουμε μοναδικές εμπειρίες.</p>
+  <div class="maintenance-box"><p id="servicesMaint">Η ενότητα βρίσκεται υπό κατασκευή.</p></div>
 </section>
 
 <section id="contact">
-  <h2>Contact</h2>
-  <p>Reach out for collaborations, bookings, or more information.</p>
+  <h2 id="contactTitle">Επικοινωνία</h2>
+  <p id="contactText">Επικοινωνήστε μαζί μας για συνεργασίες, κρατήσεις ή περισσότερες πληροφορίες.</p>
+  <div class="maintenance-box"><p id="contactMaint">Η ενότητα βρίσκεται υπό κατασκευή.</p></div>
 </section>
 
 <!-- ================= BACK TO TOP ================= -->
@@ -198,6 +225,90 @@ document.querySelectorAll('nav a[href^="#"]').forEach(anchor=>{
     if(menu.classList.contains('show')) menu.classList.remove('show');
   });
 });
+
+// ================= AUTO TRANSLATE =================
+const translations = {
+  GR: {
+    menuHome: "Αρχική",
+    menuAbout: "Σχετικά",
+    menuServices: "Υπηρεσίες",
+    menuExperience: "Εμπειρία",
+    menuContact: "Επικοινωνία",
+    homeTitle: "LIVING STATUES",
+    homeText: "Φέρνοντας την ιστορία στη ζωή μέσω της τεχνολογίας.",
+    homeMaint: "Ο ιστότοπος βρίσκεται υπό κατασκευή. Επιστρέψτε αργότερα.",
+    aboutTitle: "Σχετικά με εμάς",
+    aboutText: "Δημιουργούμε αξέχαστες εμπειρίες με ζωντανά αγάλματα που αφηγούνται ιστορίες.",
+    aboutMaint: "Η ενότητα βρίσκεται υπό κατασκευή.",
+    servicesTitle: "Οι Υπηρεσίες μας",
+    servicesText: "Από διαδραστικές παραστάσεις έως εικονική αφήγηση, παρέχουμε μοναδικές εμπειρίες.",
+    servicesMaint: "Η ενότητα βρίσκεται υπό κατασκευή.",
+    contactTitle: "Επικοινωνία",
+    contactText: "Επικοινωνήστε μαζί μας για συνεργασίες, κρατήσεις ή περισσότερες πληροφορίες.",
+    contactMaint: "Η ενότητα βρίσκεται υπό κατασκευή."
+  },
+  EN: {
+    menuHome: "Home",
+    menuAbout: "About",
+    menuServices: "Services",
+    menuExperience: "Experience",
+    menuContact: "Contact",
+    homeTitle: "LIVING STATUES",
+    homeText: "Bringing history to life through technology.",
+    homeMaint: "This site is currently under maintenance. Please check back later.",
+    aboutTitle: "About Us",
+    aboutText: "We create unforgettable experiences with living statues that tell stories and mesmerize audiences worldwide.",
+    aboutMaint: "Section under construction.",
+    servicesTitle: "Our Services",
+    servicesText: "From interactive performances to virtual storytelling, we provide unique experiences for everyone.",
+    servicesMaint: "Section under construction.",
+    contactTitle: "Contact",
+    contactText: "Reach out for collaborations, bookings, or more information.",
+    contactMaint: "Section under construction."
+  }
+};
+
+let currentLang = 'GR'; // default language
+
+function setLanguage(lang){
+  if(lang === currentLang) return; // do nothing if same language
+
+  const fadeEls = document.querySelectorAll(
+  'section h1, section h2, section p, nav a, .lang-select span, .maintenance-box, .maintenance-box p'
+);
+
+
+  // fade + slide out
+  fadeEls.forEach(el=>{
+    el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    el.style.opacity = 0;
+    el.style.transform = 'translateY(-20px)';
+  });
+
+  setTimeout(()=>{
+    for(const key in translations[lang]){
+      const el = document.getElementById(key);
+      if(el) el.textContent = translations[lang][key];
+    }
+
+    // fade + slide in with stagger
+    fadeEls.forEach((el, index)=>{
+      setTimeout(()=>{
+        el.style.opacity = 1;
+        el.style.transform = 'translateY(0)';
+      }, index*80);
+    });
+
+    currentLang = lang;
+  }, 400);
+}
+
+// set default language
+setLanguage(currentLang);
+
+document.getElementById('langGR').addEventListener('click', ()=> setLanguage('GR'));
+document.getElementById('langEN').addEventListener('click', ()=> setLanguage('EN'));
+
 </script>
 
 </body>
