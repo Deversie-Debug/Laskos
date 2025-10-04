@@ -30,7 +30,8 @@ html, body {
 .screen.active { opacity:1; pointer-events:auto; }
 
 .screen .container {
-  display:flex; flex-direction: column; align-items: center;
+  display:flex; flex-direction: column;
+  align-items: center;
   justify-content: center;
   height: 100%;
 }
@@ -226,6 +227,7 @@ const activeCall = document.getElementById('activeCall');
 const audio = document.getElementById('audio');
 const ringtone = document.getElementById('ringtone');
 const activeStatue = document.getElementById('activeStatue');
+const incomingStatue = document.getElementById('incomingStatue');
 const declineBtn = document.getElementById('declineBtn');
 const declineBtnActive = document.getElementById('declineBtnActive');
 const acceptBtn = document.getElementById('acceptBtn');
@@ -241,35 +243,40 @@ const translations = {
 
 let rippleAnimationFrame;
 
+// Enable flags after preloader animation
 function enableFlags(){
   flagsContainer.classList.add('show');
   flagsContainer.style.pointerEvents = 'auto';
 }
 
+// Animate preloader content
 function animatePreloader(callback){
-  preloaderBlock.style.opacity = 0;
   preloaderBlock.style.animation = 'fadeUp 0.8s forwards';
   setTimeout(()=>{ enableFlags(); if(callback) callback(); }, 800);
 }
 
+// Handle flag click
 function handleFlagClick(flag){
   const lang = flag.dataset.lang;
   const t = translations[lang];
+
   incomingTitle.textContent = t.incoming;
   activeTitle.textContent = t.active;
   acceptBtn.textContent = t.accept;
   callName.textContent = t.callName;
 
-  try { ringtone.currentTime=0; ringtone.play(); acceptBtn.classList.add('pulsing'); } catch(err){}
+  try { ringtone.currentTime=0; ringtone.play(); acceptBtn.classList.add('pulsing'); }
+  catch(err){ console.warn("Ringtone blocked:", err); }
 
   preloader.classList.add('fade-out');
   preloader.addEventListener('transitionend', ()=>{
     preloader.style.display='none';
     incomingCall.classList.add('active');
-    document.getElementById('incomingStatue').classList.add('show');
+    incomingStatue.classList.add('show');
   }, {once:true});
 }
 
+// Reset preloader
 function resetPreloader(){
   audio.pause(); audio.currentTime=0;
   ringtone.pause(); ringtone.currentTime=0;
@@ -281,9 +288,11 @@ function resetPreloader(){
   preloader.classList.remove('fade-out');
   flagsContainer.classList.remove('show');
   flagsContainer.style.pointerEvents='none';
+
   animatePreloader();
 }
 
+// Start call
 function startCall(){
   incomingCall.classList.remove('active');
   activeCall.classList.add('active');
@@ -309,34 +318,29 @@ audio.addEventListener('ended', ()=>{
 });
 
 acceptBtn.addEventListener('click', startCall);
-declineBtn.addEventListener('click', resetPreloader);
-declineBtnActive.addEventListener('click', resetPreloader);
+[declineBtn, declineBtnActive].forEach(btn=>btn.addEventListener('click', resetPreloader));
+document.querySelectorAll('.flag').forEach(flag=>flag.addEventListener('click', ()=>handleFlagClick(flag)));
 
-document.querySelectorAll('.flag').forEach(flag=>{
-  flag.addEventListener('click', ()=>handleFlagClick(flag));
-});
-
-// Orientation
+// Orientation handling
 function handleOrientation() {
-    const isPortrait = window.innerHeight >= window.innerWidth;
-    if (!isPortrait) {
-        audio.pause(); audio.currentTime=0;
-        ringtone.pause(); ringtone.currentTime=0;
-        acceptBtn.classList.remove('pulsing');
-        orientationMessage.classList.add('visible');
-    } else {
-        if (orientationMessage.classList.contains('visible')) {
-            orientationMessage.classList.remove('visible');
-        }
+  const isPortrait = window.innerHeight >= window.innerWidth;
+  if (!isPortrait) {
+    audio.pause(); audio.currentTime=0;
+    ringtone.pause(); ringtone.currentTime=0;
+    acceptBtn.classList.remove('pulsing');
+    orientationMessage.classList.add('visible');
+  } else {
+    if (orientationMessage.classList.contains('visible')) {
+      orientationMessage.classList.remove('visible');
     }
+  }
 }
 window.addEventListener('resize', handleOrientation);
 window.addEventListener('orientationchange', handleOrientation);
 handleOrientation();
 
-// Start initial animation
+// Start preloader
 animatePreloader();
-
 </script>
 </body>
 </html>
