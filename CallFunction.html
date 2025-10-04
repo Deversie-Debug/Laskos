@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Virtual Statue Phone Call Demo</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&display=swap" rel="stylesheet">
+<!-- Preload custom font + Google fonts -->
+<link rel="preload" href="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/Spartacus.ttf" as="font" type="font/ttf" crossorigin />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&display=swap" rel="stylesheet" />
 
 <style>
 @font-face {
@@ -191,12 +194,14 @@ html, body {
 
 <div id="preloader">
   <div class="preloader-text spartacus" id="preloaderTop"></div>
-  <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/Logo.png" class="preloader-logo" id="preloaderLogo">
+  <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/Logo.png" class="preloader-logo" id="preloaderLogo" alt="logo">
   <div class="preloader-text spartacus" id="preloaderBottom"></div>
-  <div class="flags-container">
+  <div class="flags-container" id="flagsContainer">
     <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Animated-Flag-United-Kingdom.gif" class="flag" data-lang="en" alt="English">
     <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/Animated-Flag-Greece.gif" class="flag" data-lang="gr" alt="Greek">
   </div>
+  <!-- small visible fallback hint for very slow loads -->
+  <div id="preloaderHint" style="margin-top:18px; color:#aaa; font-size:14px; opacity:0.9; display:none;">Loading…</div>
 </div>
 
 <div id="orientationMessage">
@@ -232,7 +237,27 @@ html, body {
 <audio id="ringtone" src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/telephone.mp3" loop></audio>
 
 <script>
+/* ---------- Robust font + animation handling ---------- */
+
+/*
+ Wait for fonts to be usable but avoid hanging:
+ - If the browser supports document.fonts.ready we race that against a timeout.
+ - If not supported, we use a simple timeout.
+*/
+function waitForFonts(timeoutMs = 1200) {
+  if (document.fonts && document.fonts.ready) {
+    return Promise.race([
+      document.fonts.ready,
+      new Promise(resolve => setTimeout(resolve, timeoutMs))
+    ]);
+  } else {
+    return new Promise(resolve => setTimeout(resolve, timeoutMs));
+  }
+}
+
+/* ---------- DOM refs ---------- */
 const preloader = document.getElementById('preloader');
+const preloaderHint = document.getElementById('preloaderHint');
 const incomingCall = document.getElementById('incomingCall');
 const activeCall = document.getElementById('activeCall');
 const audio = document.getElementById('audio');
@@ -247,74 +272,102 @@ const orientationMessage = document.getElementById('orientationMessage');
 const incomingTitle = document.getElementById('incomingTitle');
 const activeTitle = document.getElementById('activeTitle');
 const callName = document.getElementById('callName');
+const preloaderTop = document.getElementById('preloaderTop');
+const preloaderBottom = document.getElementById('preloaderBottom');
+const preloaderLogo = document.getElementById('preloaderLogo');
+const flagsContainer = document.getElementById('flagsContainer');
 
 let rippleAnimationFrame;
 
+/* translations */
 const translations = {
   en: { incoming: "Incoming Call", active: "Call with Statue", accept: "Accept Call", callName: "Vasilis Laskos / Βασίλης Λάσκος" },
   gr: { incoming: "Εισερχόμενη Κλήση", active: "Κλήση με Το Άγαλμα", accept: "Αποδοχή Κλήσης", callName: "Βασίλης Λάσκος" }
 };
 
-function animateLettersSequential(text, containerId, callback){
-    const container = document.getElementById(containerId);
+/* ---------- Letter animation with per-call fallback ---------- */
+function animateLettersSequential(text, containerEl, callback){
+    // containerEl can be an element or id
+    const container = typeof containerEl === 'string' ? document.getElementById(containerEl) : containerEl;
     container.textContent='';
-    let finished=0;
+    let finished = 0;
     for(let i=0;i<text.length;i++){
         const span=document.createElement('span');
         span.textContent=text[i];
-        span.style.animation=`appear 0.35s forwards`;
-        span.style.animationDelay=`${i*0.15}s`;
+        span.style.animation = `appear 0.35s forwards`;
+        span.style.animationDelay = `${i*0.15}s`;
         span.addEventListener('animationend', ()=>{ 
             finished++; 
-            if(finished===text.length && callback) callback(); 
+            if(finished===text.length && typeof callback === 'function') callback(); 
         });
         container.appendChild(span);
     }
-    // ✅ fallback if Chrome skips animationend
-    if(callback){
-        const totalDelay = text.length * 150 + 500; 
+    // fallback in case animationend doesn't fire
+    if(typeof callback === 'function'){
+        const totalDelay = text.length * 150 + 600; 
         setTimeout(()=>{ if(finished < text.length) callback(); }, totalDelay);
     }
 }
 
+/* ---------- Preloader restart (robust) ---------- */
 function restartPreloader(){
-    document.getElementById('preloaderTop').innerHTML='';
-    document.getElementById('preloaderBottom').innerHTML='';
-    const logo = document.getElementById('preloaderLogo');
-    logo.style.opacity=0; 
-    logo.style.transform="translateY(20px)"; 
-    logo.style.animation="none";
+    console.log('[preloader] restartPreloader() called');
+    preloaderTop.innerHTML = '';
+    preloaderBottom.innerHTML = '';
+    preloaderLogo.style.opacity = 0;
+    preloaderLogo.style.transform = "translateY(20px)";
+    preloaderLogo.style.animation = "none";
 
-    const flagsContainer = document.querySelector('.flags-container');
     flagsContainer.classList.remove('show');
+    preloaderHint.style.display = 'none';
 
-    // Step 1: animate "LIVING"
-    animateLettersSequential('LIVING','preloaderTop', ()=>{
-        // Step 2: animate logo
-        logo.style.animation='appear 0.35s forwards';
+    // Chain: LIVING -> logo -> STATUES -> show flags
+    animateLettersSequential('LIVING', preloaderTop, ()=>{
+        // animate logo in
+        preloaderLogo.style.animation = 'appear 0.35s forwards';
 
         let logoShown = false;
         const runBottom = ()=>{
             if(logoShown) return;
             logoShown = true;
-            // Step 3: animate "STATUES"
-            animateLettersSequential('STATUES','preloaderBottom', ()=>{
+            animateLettersSequential('STATUES', preloaderBottom, ()=>{
                 flagsContainer.classList.add('show');
+                console.log('[preloader] flags shown via animation chain');
             });
         };
 
-        logo.addEventListener('animationend', runBottom, {once:true});
-        setTimeout(runBottom, 500); // fallback
+        // try to rely on animationend but fallback quickly if it doesn't fire
+        preloaderLogo.addEventListener('animationend', runBottom, { once: true });
+        setTimeout(runBottom, 550);
     });
+
+    // If fonts/images/animations are too slow (e.g., QR open on Chrome mobile), ensure flags appear anyway:
+    const SUPER_FALLBACK_MS = 4500;
+    setTimeout(()=>{
+        if (!flagsContainer.classList.contains('show')) {
+            flagsContainer.classList.add('show');
+            // show a tiny hint so user knows it's ready
+            preloaderHint.style.display = 'block';
+            preloaderHint.textContent = 'Tap a flag to start';
+            console.log('[preloader] super-fallback: forced flags show after', SUPER_FALLBACK_MS, 'ms');
+        }
+    }, SUPER_FALLBACK_MS);
 }
 
-restartPreloader();
+/* ---------- Initialize preloader after fonts (or timeout) ---------- */
+waitForFonts(1200).then(()=>{
+    console.log('[fonts] ready or timeout reached — starting preloader');
+    restartPreloader();
+}).catch((err)=>{
+    console.warn('[fonts] wait failed', err);
+    restartPreloader();
+});
 
-// Flag click
+/* ---------- Flag click behavior ---------- */
 flags.forEach(flag => {
     flag.addEventListener('click', ()=>{
         const lang = flag.dataset.lang;
-        const t = translations[lang];
+        const t = translations[lang] || translations.en;
 
         incomingTitle.textContent = t.incoming;
         activeTitle.textContent = t.active;
@@ -325,22 +378,29 @@ flags.forEach(flag => {
             ringtone.currentTime = 0; 
             ringtone.play(); 
             acceptBtn.classList.add('pulsing'); 
-        } catch(err){ console.log('Ringtone blocked', err); }
+        } catch(err){ console.log('Ringtone blocked (expected on mobile until gesture):', err); }
 
         preloader.classList.add('fade-out');
-        preloader.addEventListener('transitionend', ()=>{
+        // fallback: ensure we hide the preloader even if transitionend doesn't fire
+        const onDone = ()=>{
             preloader.style.display='none';
             incomingCall.classList.add('active');
-            document.getElementById('incomingStatue').classList.add('show');
-        }, {once:true});
+            const incStat = document.getElementById('incomingStatue');
+            if (incStat) incStat.classList.add('show');
+        };
+        preloader.addEventListener('transitionend', onDone, { once: true });
+        setTimeout(() => {
+            if (getComputedStyle(preloader).display !== 'none') onDone();
+        }, 700);
     });
 });
 
+/* ---------- Start call ---------- */
 function startCall(){
     incomingCall.classList.remove('active');
     activeCall.classList.add('active');
     activeStatue.classList.add('show','talking');
-    audio.currentTime=0; audio.play();
+    try { audio.currentTime = 0; audio.play(); } catch(e) { console.log('audio play blocked:', e); }
     ringtone.pause(); ringtone.currentTime=0;
     acceptBtn.classList.remove('pulsing');
 
@@ -360,6 +420,7 @@ audio.addEventListener('ended', ()=>{
     cancelAnimationFrame(rippleAnimationFrame);
 });
 
+/* ---------- Return to preloader ---------- */
 function returnToPreloader(){
     audio.pause(); audio.currentTime=0;
     ringtone.pause(); ringtone.currentTime=0;
@@ -374,10 +435,12 @@ function returnToPreloader(){
     restartPreloader();
 }
 
+/* ---------- Event bindings ---------- */
 acceptBtn.addEventListener('click', startCall);
 declineBtn.addEventListener('click', returnToPreloader);
 declineBtnActive.addEventListener('click', returnToPreloader);
 
+/* ---------- Orientation handling ---------- */
 function handleOrientation() {
     const isPortrait = window.innerHeight >= window.innerWidth;
     if (!isPortrait) {
@@ -388,7 +451,8 @@ function handleOrientation() {
     } else {
         if (orientationMessage.classList.contains('visible')) {
             orientationMessage.classList.remove('visible');
-            location.reload();
+            // avoid infinite reload loops; only reload if preloader was showing previously
+            try { location.reload(); } catch(e) { console.log('reload failed', e); }
         }
     }
 }
@@ -404,6 +468,7 @@ document.addEventListener('touchstart', (e) => {
 document.addEventListener('click', (e) => {
     if (orientationMessage.classList.contains('visible')) e.stopPropagation();
 }, true);
+
 </script>
 </body>
 </html>
