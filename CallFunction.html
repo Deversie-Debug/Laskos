@@ -30,8 +30,7 @@ html, body {
 .screen.active { opacity:1; pointer-events:auto; }
 
 .screen .container {
-  display:flex; flex-direction: column;
-  align-items: center;
+  display:flex; flex-direction: column; align-items: center;
   justify-content: center;
   height: 100%;
 }
@@ -49,16 +48,17 @@ html, body {
   width:100%; height:100%;
   border-radius:50%;
   z-index:2;
-  transition: opacity 0.5s ease, transform 0.5s ease;
   opacity:0;
+  transition: opacity 1s ease;
 }
 
-.statue-img.show { opacity:1; transform: scale(1); }
+.statue-img.show { opacity:1; }
+
 .talking { animation: talk 0.6s infinite alternate; }
 @keyframes talk { 0%{transform:scale(1);} 50%{transform:scale(1.03);} 100%{transform:scale(1);} }
 
-@keyframes ripple { 0%{ transform: scale(0.8); opacity:0.5; } 100%{ transform: scale(2.5); opacity:0; } }
 .ripple { position: absolute; border:2px solid rgba(255,255,255,0.5); width:120%; height:120%; border-radius:50%; top:-10%; left:-10%; pointer-events:none; animation:ripple 1s ease-out forwards; }
+@keyframes ripple { 0%{ transform: scale(0.8); opacity:0.5; } 100%{ transform: scale(2.5); opacity:0; } }
 
 .accept-btn {
   padding: 15px 40px;
@@ -74,90 +74,65 @@ html, body {
 }
 .accept-btn:hover { transform: scale(1.05); box-shadow: 0 7px 20px rgba(0,0,0,0.5); }
 .accept-btn.pulsing { animation: pulse 1s infinite; }
-
-@keyframes pulse {
-  0% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-  50% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-  100% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-}
+@keyframes pulse { 0% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.3); } 50% { transform: scale(1.05); box-shadow: 0 10px 25px rgba(0,0,0,0.5); } 100% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.3); } }
 
 .decline-btn {
-  position: fixed;
-  top: 15px;
-  right: 15px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255,0,0,0.8);
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
+  position: fixed; top: 15px; right: 15px; width: 40px; height: 40px;
+  border: none; border-radius: 50%; background: rgba(255,0,0,0.8);
+  color: white; font-size: 24px; cursor: pointer; display: flex; justify-content: center; align-items: center; z-index: 10;
 }
 
 /* Preloader */
 #preloader {
   position: fixed; top:0; left:0; width:100vw; height:100vh; display:flex; justify-content:center; align-items:center; flex-direction: column; z-index:9999; padding:20px; box-sizing:border-box; opacity:1;
-  transition: opacity 0.5s ease, transform 0.5s ease;
+  transition: opacity 0.5s ease;
 }
-#preloader.fade-out { opacity:0; transform: translateY(-40px); }
-
-.preloader-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  opacity:0;
-  animation: fadeUp 0.8s forwards;
-}
+#preloader.fade-out { opacity:0; }
 
 .preloader-text {
   font-family: 'Playfair Display', serif;
-  font-weight: 900;
-  font-size: clamp(30px,10vw,100px);
-  color: #ddd;
-  text-align: center;
+  font-weight:900; 
+  font-size:clamp(30px,10vw,100px);
+  color:#ddd;
+  text-align:center;
   text-shadow: 0 0 4px rgba(255,255,255,0.3), 0 0 8px rgba(255,255,255,0.15);
+  opacity:0; transition: opacity 0.5s ease;
 }
 
-.preloader-logo { width: clamp(40px,10vw,80px); }
+.preloader-text.show { opacity:1; }
+
+.preloader-logo {
+  width: clamp(40px,10vw,80px);
+  margin:10px 0;
+  opacity:0;
+  transition: opacity 0.5s ease;
+}
+.preloader-logo.show { opacity:1; }
+
+.spartacus { font-family: 'Spartacus', sans-serif; }
 
 .flags-container {
-  display:flex;
-  gap:20px;
-  justify-content:center;
-  opacity:0;
-  pointer-events:none;
+  display:flex; gap:20px;
+  opacity:0; pointer-events:none;
   margin-top:20px;
-  animation: fadeUp 0.8s forwards;
-  animation-delay: 0.5s;
+  transition: opacity 0.5s ease;
 }
-
 .flags-container.show { opacity:1; pointer-events:auto; }
 
 .flag { width:60px; height:40px; cursor:pointer; border-radius:5px; border:2px solid transparent; transition: transform 0.2s, border 0.2s; }
 .flag:hover { transform: scale(1.1); border:2px solid #0077cc; }
 
-@keyframes fadeUp { 
-  0% { opacity:0; transform: translateY(20px); }
-  100% { opacity:1; transform: translateY(0); }
-}
-
-.spartacus { font-family: 'Spartacus', sans-serif; }
-
+/* Orientation Message */
 #orientationMessage {
-  position: fixed; top:0; left:0; width:100vw; height:100vh; background: #000; color: #fff;
+  position: fixed; top:0; left:0; width:100vw; height:100vh;
+  background: #000; color: #fff;
   display: flex; justify-content: center; align-items: center; text-align: center; padding: 20px; z-index: 99999;
   opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
 }
 #orientationMessage.visible { opacity:1; pointer-events:auto; }
 
 .overlay-content { display:flex; flex-direction:column; align-items:center; gap:20px; }
-.overlay-content div { font-size: 4vw; max-width: 90vw; }
+.overlay-content div { font-size: 4vw; max-width:90vw; }
 .rotate-gif { width:100px; height:100px; max-width:25vw; max-height:25vw; }
 
 @media(max-width:500px){
@@ -172,11 +147,9 @@ html, body {
 
 <!-- Preloader -->
 <div id="preloader">
-  <div class="preloader-block">
-    <div class="preloader-text spartacus" id="preloaderTop">LIVING</div>
-    <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/Logo.png" class="preloader-logo" id="preloaderLogo">
-    <div class="preloader-text spartacus" id="preloaderBottom">STATUES</div>
-  </div>
+  <div class="preloader-text spartacus" id="preloaderTop">LIVING</div>
+  <img src="https://raw.githubusercontent.com/Deversie-Debug/Laskos/main/Logo.png" class="preloader-logo" id="preloaderLogo">
+  <div class="preloader-text spartacus" id="preloaderBottom">STATUES</div>
   <div class="flags-container" id="flagsContainer">
     <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Animated-Flag-United-Kingdom.gif" class="flag" data-lang="en" alt="English">
     <img src="https://upload.wikimedia.org/wikipedia/commons/e/eb/Animated-Flag-Greece.gif" class="flag" data-lang="gr" alt="Greek">
@@ -220,77 +193,57 @@ html, body {
 
 <script>
 const preloader = document.getElementById('preloader');
-const preloaderBlock = document.querySelector('.preloader-block');
-const flagsContainer = document.getElementById('flagsContainer');
 const incomingCall = document.getElementById('incomingCall');
 const activeCall = document.getElementById('activeCall');
 const audio = document.getElementById('audio');
 const ringtone = document.getElementById('ringtone');
+const flags = document.querySelectorAll('.flag');
 const activeStatue = document.getElementById('activeStatue');
-const incomingStatue = document.getElementById('incomingStatue');
 const declineBtn = document.getElementById('declineBtn');
 const declineBtnActive = document.getElementById('declineBtnActive');
 const acceptBtn = document.getElementById('acceptBtn');
+const flagsContainer = document.getElementById('flagsContainer');
+
 const incomingTitle = document.getElementById('incomingTitle');
 const activeTitle = document.getElementById('activeTitle');
 const callName = document.getElementById('callName');
-const orientationMessage = document.getElementById('orientationMessage');
-
-const translations = {
-  en:{incoming:"Incoming Call",active:"Call with Statue",accept:"Accept Call",callName:"Vasilis Laskos / Βασίλης Λάσκος"},
-  gr:{incoming:"Εισερχόμενη Κλήση",active:"Κλήση με Το Άγαλμα",accept:"Αποδοχή Κλήσης",callName:"Βασίλης Λάσκος"}
-};
 
 let rippleAnimationFrame;
 
-// Enable flags after preloader animation
-function enableFlags(){
-  flagsContainer.classList.add('show');
-  flagsContainer.style.pointerEvents = 'auto';
+const translations = {
+  en: { incoming: "Incoming Call", active: "Call with Statue", accept: "Accept Call", callName: "Vasilis Laskos / Βασίλης Λάσκος" },
+  gr: { incoming: "Εισερχόμενη Κλήση", active: "Κλήση με Το Άγαλμα", accept: "Αποδοχή Κλήσης", callName: "Βασίλης Λάσκος" }
+};
+
+// Sequential smooth fade-in over 2 seconds
+function showPreloader(){
+  setTimeout(()=>{ document.getElementById('preloaderTop').classList.add('show'); }, 0);       // 0s
+  setTimeout(()=>{ document.getElementById('preloaderLogo').classList.add('show'); }, 500);    // 0.5s
+  setTimeout(()=>{ document.getElementById('preloaderBottom').classList.add('show'); }, 1000); // 1s
+  setTimeout(()=>{ flagsContainer.classList.add('show'); }, 1500);                             // 1.5s
 }
 
-// Animate preloader content
-function animatePreloader(callback){
-  preloaderBlock.style.animation = 'fadeUp 0.8s forwards';
-  setTimeout(()=>{ enableFlags(); if(callback) callback(); }, 800);
-}
+// Flags click
+flags.forEach(flag => {
+  flag.addEventListener('click', ()=>{
+    const lang = flag.dataset.lang;
+    const t = translations[lang];
 
-// Handle flag click
-function handleFlagClick(flag){
-  const lang = flag.dataset.lang;
-  const t = translations[lang];
+    incomingTitle.textContent = t.incoming;
+    activeTitle.textContent = t.active;
+    acceptBtn.textContent = t.accept;
+    callName.textContent = t.callName;
 
-  incomingTitle.textContent = t.incoming;
-  activeTitle.textContent = t.active;
-  acceptBtn.textContent = t.accept;
-  callName.textContent = t.callName;
+    try { ringtone.currentTime = 0; ringtone.play(); acceptBtn.classList.add('pulsing'); } catch(err){}
 
-  try { ringtone.currentTime=0; ringtone.play(); acceptBtn.classList.add('pulsing'); }
-  catch(err){ console.warn("Ringtone blocked:", err); }
-
-  preloader.classList.add('fade-out');
-  preloader.addEventListener('transitionend', ()=>{
-    preloader.style.display='none';
-    incomingCall.classList.add('active');
-    incomingStatue.classList.add('show');
-  }, {once:true});
-}
-
-// Reset preloader
-function resetPreloader(){
-  audio.pause(); audio.currentTime=0;
-  ringtone.pause(); ringtone.currentTime=0;
-  cancelAnimationFrame(rippleAnimationFrame);
-
-  activeCall.classList.remove('active');
-  incomingCall.classList.remove('active');
-  preloader.style.display='flex';
-  preloader.classList.remove('fade-out');
-  flagsContainer.classList.remove('show');
-  flagsContainer.style.pointerEvents='none';
-
-  animatePreloader();
-}
+    preloader.classList.add('fade-out');
+    preloader.addEventListener('transitionend', ()=>{
+      preloader.style.display='none';
+      incomingCall.classList.add('active');
+      document.getElementById('incomingStatue').classList.add('show');
+    }, {once:true});
+  });
+});
 
 // Start call
 function startCall(){
@@ -307,7 +260,7 @@ function startCall(){
     ripple.classList.add('ripple');
     activeStatue.parentElement.appendChild(ripple);
     setTimeout(()=>ripple.remove(),1000);
-    rippleAnimationFrame=requestAnimationFrame(()=>{ setTimeout(rippleLoop,400); });
+    rippleAnimationFrame = requestAnimationFrame(()=>{ setTimeout(rippleLoop,400); });
   }
   rippleLoop();
 }
@@ -317,30 +270,45 @@ audio.addEventListener('ended', ()=>{
   cancelAnimationFrame(rippleAnimationFrame);
 });
 
+function returnToPreloader(){
+  audio.pause(); audio.currentTime=0;
+  ringtone.pause(); ringtone.currentTime=0;
+  cancelAnimationFrame(rippleAnimationFrame);
+
+  activeCall.classList.remove('active');
+  incomingCall.classList.remove('active');
+  preloader.style.display='flex';
+  preloader.classList.remove('fade-out');
+  acceptBtn.classList.remove('pulsing');
+
+  showPreloader();
+}
+
 acceptBtn.addEventListener('click', startCall);
-[declineBtn, declineBtnActive].forEach(btn=>btn.addEventListener('click', resetPreloader));
-document.querySelectorAll('.flag').forEach(flag=>flag.addEventListener('click', ()=>handleFlagClick(flag)));
+declineBtn.addEventListener('click', returnToPreloader);
+declineBtnActive.addEventListener('click', returnToPreloader);
 
 // Orientation handling
 function handleOrientation() {
   const isPortrait = window.innerHeight >= window.innerWidth;
+  const msg = document.getElementById('orientationMessage');
   if (!isPortrait) {
     audio.pause(); audio.currentTime=0;
     ringtone.pause(); ringtone.currentTime=0;
     acceptBtn.classList.remove('pulsing');
-    orientationMessage.classList.add('visible');
-  } else {
-    if (orientationMessage.classList.contains('visible')) {
-      orientationMessage.classList.remove('visible');
-    }
+    msg.classList.add('visible');
+  } else if(msg.classList.contains('visible')) { 
+    msg.classList.remove('visible'); 
+    location.reload(); 
   }
 }
 window.addEventListener('resize', handleOrientation);
 window.addEventListener('orientationchange', handleOrientation);
 handleOrientation();
 
-// Start preloader
-animatePreloader();
+// Show preloader on load
+showPreloader();
 </script>
+
 </body>
 </html>
