@@ -264,8 +264,16 @@ function animateLettersSequential(text, containerId, callback){
         span.textContent=text[i];
         span.style.animation=`appear 0.35s forwards`;
         span.style.animationDelay=`${i*0.15}s`;
-        span.addEventListener('animationend', ()=>{ finished++; if(finished===text.length && callback) callback(); });
+        span.addEventListener('animationend', ()=>{ 
+            finished++; 
+            if(finished===text.length && callback) callback(); 
+        });
         container.appendChild(span);
+    }
+    // ✅ fallback if Chrome skips animationend
+    if(callback){
+        const totalDelay = text.length * 150 + 500; 
+        setTimeout(()=>{ if(finished < text.length) callback(); }, totalDelay);
     }
 }
 
@@ -273,17 +281,30 @@ function restartPreloader(){
     document.getElementById('preloaderTop').innerHTML='';
     document.getElementById('preloaderBottom').innerHTML='';
     const logo = document.getElementById('preloaderLogo');
-    logo.style.opacity=0; logo.style.transform="translateY(20px)"; logo.style.animation="none";
+    logo.style.opacity=0; 
+    logo.style.transform="translateY(20px)"; 
+    logo.style.animation="none";
+
     const flagsContainer = document.querySelector('.flags-container');
     flagsContainer.classList.remove('show');
 
+    // Step 1: animate "LIVING"
     animateLettersSequential('LIVING','preloaderTop', ()=>{
+        // Step 2: animate logo
         logo.style.animation='appear 0.35s forwards';
-        logo.addEventListener('animationend', ()=>{
+
+        let logoShown = false;
+        const runBottom = ()=>{
+            if(logoShown) return;
+            logoShown = true;
+            // Step 3: animate "STATUES"
             animateLettersSequential('STATUES','preloaderBottom', ()=>{
                 flagsContainer.classList.add('show');
             });
-        });
+        };
+
+        logo.addEventListener('animationend', runBottom, {once:true});
+        setTimeout(runBottom, 500); // fallback
     });
 }
 
